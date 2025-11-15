@@ -1,0 +1,358 @@
+/* ==================== WARDROBE PAGE ==================== */
+:root {
+  --blue-bell: #1e91d6;
+  --twitter-blue: #0072bb;
+  --yellow-green: #8fc93a;
+  --golden-glow: #e4cc37;
+  --golden-chestnut: #e18335;
+}
+
+.wardrobe-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  display: flex;
+  flex-direction: column;
+}
+
+.wardrobe-header {
+  background: linear-gradient(135deg, var(--blue-bell) 0%, var(--twitter-blue) 100%);
+  padding: 2rem;
+  color: white;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wardrobe-header h1 {
+  font-size: 2.5rem;
+}
+
+.plan-badge {
+  padding: 0.6rem 1.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.free-plan {
+  color: #fff;
+}
+
+.premium-plan {
+  color: var(--golden-glow);
+}
+
+.wardrobe-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.closets-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+  flex: 1;
+}
+
+.closet-item {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  border: 3px solid #e0e0e0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.closet-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.61);
+  border-color: var(--blue-bell);
+}
+
+.closet-content {
+  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.closet-icon-large {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+}
+
+.closet-item h3 {
+  font-size: 1.4rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.item-count {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: #ff4444;
+  border: none;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.closet-item:hover .delete-btn {
+  opacity: 1;
+}
+
+.delete-btn:hover {
+  transform: scale(1.1);
+  background: #ff2222;
+}
+
+.create-new {
+  border: 3px dashed var(--blue-bell);
+  background: rgba(30, 145, 214, 0.05);
+}
+
+.create-new:hover {
+  background: rgba(30, 145, 214, 0.1);
+  border-color: var(--twitter-blue);
+}
+
+.create-icon {
+  font-size: 4rem;
+  color: var(--blue-bell);
+  margin-bottom: 1rem;
+}
+
+.create-form {
+  cursor: default;
+}
+
+.create-form:hover {
+  transform: none;
+}
+
+.closet-form {
+  width: 100%;
+}
+
+.closet-form h3 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #333;
+}
+
+.closet-name-input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  background: #ffffff; 
+  color: #333;         
+}
+
+
+.closet-name-input:focus {
+  outline: none;
+  border-color: var(--blue-bell);
+}
+
+.color-picker {
+  margin-bottom: 1.5rem;
+}
+
+.color-picker label {
+  display: block;
+  color: #666;
+  margin-bottom: 0.8rem;
+  font-size: 0.9rem;
+}
+
+.color-options {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.color-option {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+}
+
+.color-option.selected {
+  border-color: #333;
+  box-shadow: 0 0 0 3px rgba(30, 145, 214, 0.2);
+}
+
+.form-buttons {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.create-submit-btn,
+.cancel-form-btn {
+  flex: 1;
+  padding: 0.9rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.create-submit-btn {
+  background: linear-gradient(135deg, var(--blue-bell), var(--twitter-blue));
+  color: white;
+}
+
+.create-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(30, 145, 214, 0.3);
+}
+
+.cancel-form-btn {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.cancel-form-btn:hover {
+  background: #e0e0e0;
+}
+
+.upgrade-cta {
+  background: linear-gradient(135deg, var(--yellow-green), var(--golden-glow));
+  color: white;
+  padding: 3rem;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.upgrade-cta h3 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.upgrade-cta p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.upgrade-btn {
+  padding: 1rem 3rem;
+  background: white;
+  color: var(--twitter-blue);
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upgrade-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  background: var(--golden-chestnut);
+  color: white;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-icon {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h2 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.create-first-btn {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, var(--blue-bell), var(--twitter-blue));
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.create-first-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(30, 145, 214, 0.3);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .closets-container {
+    grid-template-columns: 1fr;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
