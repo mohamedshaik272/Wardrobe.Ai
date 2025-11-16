@@ -1,224 +1,239 @@
-// WardrobePage.jsx
+import { useState, useEffect } from "react";
+import "./WardrobePage.css";
 
-import { useState, useEffect } from 'react';
-import './WardrobePage.css';
+// List of image paths for the slideshow
+const slideshowImages = [
+  "/picture13.jpg",
+  "/picture14.jpg",
+  "/picture15.jpg",
+  "/picture16.jpg",
+  "/picture17.jpg",
+  "/picture18.jpg",
+];
 
-// --- Navbar Component (Adapted from HomePage.jsx) ---
-// Updated to include the Add Closet button and counter
-const Navbar = ({ onNavigate, onAddCloset, closetCount, canCreateMore }) => {
+function WardrobePage({ onNavigate }) {
   const [scrolled, setScrolled] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [closets, setClosets] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [newClosetData, setNewClosetData] = useState({
+    name: "",
+    itemCount: "",
+    type: ""
+  });
 
+  // Effect for the scrolling navbar background change and shrinking effect
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
+      
+      // Calculate scroll progress for shrinking effect
+      // Shrink over the first 50vh of scrolling
+      const maxScroll = window.innerHeight * 0.5;
+      const currentScroll = window.scrollY;
+      const progress = Math.min(currentScroll / maxScroll, 1);
+      setScrollProgress(progress);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  return (
-    <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
-      <div className="nav-content">
-        <div className="logo" onClick={() => onNavigate('home')}>Wardrobe.AI</div>
-        {/* New nav-links container to hold button and counter */}
-        <div className="nav-links">
-          <div className="closet-counter-pill">
-            {closetCount}
-          </div>
-          <button
-            className="nav-btn primary"
-            onClick={onAddCloset}
-            disabled={!canCreateMore}
-            title={!canCreateMore ? "Max closets reached for your plan" : "Create New Closet"}
-          >
-            + Add Closet
-          </button>
-        </div>
-      </div>
-    </nav>
-  );
-};
-// -------------------------
+  // Effect for the automatic image slideshow
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentImageIndex((prevIndex) =>
+        (prevIndex + 1) % slideshowImages.length
+      );
+    }, 5000); // Change image every 5 seconds (5000ms)
 
-const initialClosets = [
-  { id: 1, name: 'Work Wardrobe', itemCount: 45, color: '#1e91d6' },
-  { id: 2, name: 'Weekend Casual', itemCount: 30, color: '#8fc93a' },
-  { id: 3, name: 'Athletic Gear', itemCount: 15, color: '#e4cc37' },
-];
+    return () => clearInterval(intervalId); // Cleanup interval on component unmount
+  }, []);
 
-function WardrobePage({ onNavigate, userPlan = 'free' }) {
-  const [closets, setClosets] = useState(initialClosets);
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [newClosetName, setNewClosetName] = useState('');
-  const [selectedColor, setSelectedColor] = useState('#1e91d6');
-
-  const maxClosets = userPlan === 'free' ? 4 : Infinity;
-  const canCreateMore = closets.length < maxClosets;
-
-  const colors = ['#1e91d6', '#0072bb', '#8fc93a', '#e4cc37', '#e18335', '#ff6b9d'];
-
-  const handleOpenCloset = (closet) => {
-    onNavigate('closet', closet);
+  // Handle opening the modal
+  const handleAddCloset = () => {
+    setShowModal(true);
   };
 
-  const handleCreateCloset = (e) => {
-    e.preventDefault();
-    if (newClosetName.trim() && canCreateMore) {
+  // Handle closing the modal
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setNewClosetData({ name: "", itemCount: "", type: "" });
+  };
+
+  // Handle input changes in the modal
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewClosetData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Handle creating a new closet
+  const handleCreateCloset = () => {
+    if (newClosetData.name && newClosetData.itemCount && newClosetData.type) {
       const newCloset = {
         id: Date.now(),
-        name: newClosetName,
-        itemCount: 0,
-        color: selectedColor
+        ...newClosetData
       };
-      setClosets([...closets, newCloset]);
-      setNewClosetName('');
-      setShowCreateForm(false);
+      setClosets(prev => [...prev, newCloset]);
+      handleCloseModal();
+      
+      // Navigate to the closet page with the new closet data
+      onNavigate("closet", newCloset);
+    } else {
+      alert("Please fill in all fields");
     }
   };
-
-  // Function to pass to the navbar
-  const handleAddClosetClick = () => {
-    if (canCreateMore) {
-      setShowCreateForm(true);
-    }
-  };
-
-  // Component to render when there are no closets
-  const EmptyState = () => (
-    <div className="empty-state-container">
-      <svg className="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M18.8 1.1C18.1 0.4 17.1 0 16 0H8C6.9 0 5.9 0.4 5.2 1.1L0 6.3V21c0 1.7 1.3 3 3 3h18c1.7 0 3-1.3 3-3V6.3L18.8 1.1zM16 2h-8c-0.2 0-0.4 0.1-0.6 0.2L3.8 5h16.4l-3.6-2.8c-0.2-0.1-0.4-0.2-0.6-0.2zM22 21c0 0.6-0.4 1-1 1H3c-0.6 0-1-0.4-1-1V7h20v14zM12 10c-0.6 0-1 0.4-1 1v5c0 0.6 0.4 1 1 1s1-0.4 1-1v-5c0-0.6-0.4-1-1-1zM9 13c0 0.6 0.4 1 1 1h4c0.6 0 1-0.4 1-1s-0.4-1-1-1h-4c-0.6 0-1 0.4-1 1z"/>
-      </svg>
-      <h3>You have no closets yet.</h3>
-      <p>Start by creating your first style collection to manage your items and launch your AI stylist.</p>
-      {canCreateMore && (
-        <button className="nav-btn primary empty-state-btn" onClick={handleAddClosetClick}>
-          + Create My First Closet
-        </button>
-      )}
-      {!canCreateMore && (
-         <p className="max-closet-message">Maximum closets reached for your current plan. Please upgrade to create more.</p>
-      )}
-    </div>
-  );
 
   return (
     <div className="wardrobe-page">
-      <Navbar 
-        onNavigate={onNavigate} 
-        onAddCloset={handleAddClosetClick} 
-        closetCount={closets.length} 
-        canCreateMore={canCreateMore}
-      />
-      
-      {/* Header/Banner Section - Takes up space below fixed navbar */}
-      <div className="wardrobe-banner">
-        <div className="banner-content">
-          <h1>Your Digital Wardrobe</h1>
-          <p className="tagline">Manage your style collections and launch your AI stylist.</p>
-          <div className="plan-status">
-            {userPlan === 'free' ? (
-              <span className="status-badge">Free Plan ({closets.length} / {maxClosets} Closets)</span>
-            ) : (
-              <span className="status-badge premium">Premium Member</span>
-            )}
+      {/* Navigation Bar - Stays white and sharp */}
+      <nav className={`navbar always-white ${scrolled ? "scrolled" : ""}`}>
+        <div className="nav-content">
+          <div className="logo" onClick={() => onNavigate("home")}>
+            Wardrobe.AI
+          </div>
+          <div className="nav-links">
+            <button
+              className="nav-btn primary"
+              onClick={() => alert("Launching AI Stylist...")}
+            >
+              Launch Stylist
+            </button>
           </div>
         </div>
+      </nav>
+
+      {/* Main Container for the Shrink Effect */}
+      <div className="hero-scroll-wrapper">
+        
+        {/* Hero Section with Split Content */}
+        <section 
+          className="wardrobe-hero-split"
+          style={{
+            transform: `scale(${1 - scrollProgress * 0.15})`,
+            opacity: 1 - scrollProgress * 0.3
+          }}
+        >
+          
+          {/* Left Column: Text Content (Closer to Navbar) */}
+          <div className="hero-text-container-split">
+            <h1 className="hero-title">Your Digital Wardrobe</h1>
+            <p className="hero-tagline">
+            Your style hub. Create and manage closets, organize your pieces, and access your AI stylist in one streamlined space.            
+            </p>
+          </div>
+
+          {/* Right Column: Image Slideshow (Farther from Navbar) */}
+          <div className="slideshow-container-split">
+            {slideshowImages.map((image, index) => (
+              <div
+                key={index}
+                className={`slide ${
+                  index === currentImageIndex ? "active" : ""
+                }`}
+              >
+                <img src={image} alt={`Wardrobe Slide ${index + 1}`} />
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
 
-      <div className="wardrobe-main-content">
-        <div className="wardrobe-actions">
-          <h2>My Closets</h2> 
-          {/* Hiding button here, as it is now in the fixed navbar */}
-          {/* <button className="nav-btn primary" onClick={() => setShowCreateForm(true)}>+ Create New Closet</button> */}
-        </div>
+      {/* Closet Grid Section */}
+      <section className="closet-grid-section">
+        <div className="closet-grid-container">
+          <h2 className="grid-title">Your Closets</h2>
+          
+          <div className="closet-grid">
+            {/* Add Closet Card */}
+            <div className="closet-card add-closet-card" onClick={handleAddCloset}>
+              <div className="add-closet-icon">+</div>
+              <h3>Add Closet</h3>
+            </div>
 
-        {/* Create Closet Form/Modal */}
-        {showCreateForm && (
-          <div className="create-closet-form-container">
-            <h3>Create a New Closet</h3>
-            <form onSubmit={handleCreateCloset} className="create-closet-form">
+            {/* Existing Closets */}
+            {closets.map(closet => (
+              <div 
+                key={closet.id} 
+                className="closet-card"
+                onClick={() => onNavigate("closet", closet)}
+              >
+                <div className="closet-card-content">
+                  <h3>{closet.name}</h3>
+                  <p className="closet-type">{closet.type}</p>
+                  <p className="closet-items">{closet.itemCount} items</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Modal for Creating New Closet */}
+      {showModal && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Create New Closet</h2>
+            
+            <div className="modal-form">
               <div className="form-group">
-                <label htmlFor="closetName">Closet Name</label>
+                <label htmlFor="name">Closet Name</label>
                 <input
-                  id="closetName"
                   type="text"
-                  placeholder="e.g., Spring Capsule"
-                  value={newClosetName}
-                  onChange={(e) => setNewClosetName(e.target.value)}
-                  required
+                  id="name"
+                  name="name"
+                  value={newClosetData.name}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Summer Collection"
                 />
               </div>
 
               <div className="form-group">
-                <label>Accent Color</label>
-                <div className="color-options">
-                  {colors.map(color => (
-                    <button
-                      key={color}
-                      type="button"
-                      className={`color-option ${selectedColor === color ? 'selected' : ''}`}
-                      style={{ background: color }}
-                      onClick={() => setSelectedColor(color)}
-                    />
-                  ))}
-                </div>
+                <label htmlFor="itemCount">Number of Items</label>
+                <input
+                  type="number"
+                  id="itemCount"
+                  name="itemCount"
+                  value={newClosetData.itemCount}
+                  onChange={handleInputChange}
+                  placeholder="e.g., 20"
+                  min="1"
+                />
               </div>
 
-              <div className="form-buttons">
-                <button type="submit" className="create-submit-btn">
-                  Create
-                </button>
-                <button 
-                  type="button" 
-                  className="cancel-form-btn"
-                  onClick={() => {
-                    setShowCreateForm(false);
-                    setNewClosetName('');
-                  }}
+              <div className="form-group">
+                <label htmlFor="type">Closet Type</label>
+                <select
+                  id="type"
+                  name="type"
+                  value={newClosetData.type}
+                  onChange={handleInputChange}
                 >
+                  <option value="">Select a type</option>
+                  <option value="Casual/Leisure">Casual/Leisure</option>
+                  <option value="Formal">Formal</option>
+                  <option value="Athletics">Athletics</option>
+                  <option value="Work">Work</option>
+                  <option value="Seasonal">Seasonal</option>
+                  <option value="Special Occasion">Special Occasion</option>
+                </select>
+              </div>
+
+              <div className="modal-actions">
+                <button className="btn-cancel" onClick={handleCloseModal}>
                   Cancel
                 </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* Conditional rendering of Closets Grid or Empty State */}
-        {closets.length > 0 ? (
-          <div className="closet-grid">
-            {closets.map((closet) => (
-              <div 
-                key={closet.id} 
-                className="closet-card"
-                style={{ '--closet-color': closet.color }}
-                onClick={() => handleOpenCloset(closet)}
-              >
-                <div className="card-header" style={{ backgroundColor: closet.color }}></div>
-                <div className="card-content">
-                  <h3 className="closet-name">{closet.name}</h3>
-                  <p className="item-count">{closet.itemCount} Items</p>
-                  <button className="view-btn">View Closet →</button>
-                </div>
-              </div>
-            ))}
-            
-            {/* Upgrade CTA for Free Users - Remains in the grid */}
-            {!canCreateMore && userPlan === 'free' && (
-              <div className="upgrade-cta closet-card">
-                <h3>🚀 Unlock More Closets</h3>
-                <p>Upgrade to Premium for unlimited collections and more features!</p>
-                <button className="nav-btn primary" onClick={() => onNavigate('home')}>
-                  Go Premium
+                <button className="btn-create" onClick={handleCreateCloset}>
+                  Create Closet
                 </button>
               </div>
-            )}
-            
+            </div>
           </div>
-        ) : (
-          <EmptyState />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
