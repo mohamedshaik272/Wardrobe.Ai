@@ -1,14 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './HomePage.css';
 
 function HomePage({ onNavigate }) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div className="home-page">
       {/* Navigation Bar */}
-      <nav className="navbar">
+      <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
         <div className="nav-content">
           <div className="logo">Wardrobe.AI</div>
           <div className="nav-links">
+            <a href="#approach" className="nav-link">Approach</a>
+            <a href="#features" className="nav-link">Features</a>
+            <a href="#about" className="nav-link">About</a>
             <button className="nav-btn primary" onClick={() => onNavigate('wardrobe')}>
               Get Started
             </button>
@@ -16,168 +29,167 @@ function HomePage({ onNavigate }) {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="hero-section">
-        <div className="hero-content">
-          <h1 className="main-title">Your Personal AI Stylist</h1>
-          <p className="main-subtitle">
-            Build your digital wardrobe, chat with AI about your style, and discover 
-            perfect outfits tailored to your preferences
+      {/* Hero Section - Full Screen */}
+      <section className="hero-fullscreen">
+        <div className="hero-text-container">
+          <h1 className="hero-title">
+            Your Personal
+            <br />
+            AI Stylist
+          </h1>
+          <p className="hero-tagline">
+            Creating personalized wardrobes with and for you to define
+            <br />
+            the future of your style
           </p>
-          <button 
-            className="hero-cta" 
-            onClick={() => onNavigate('wardrobe')}
-          >
-            Start Building Your Wardrobe
-          </button>
         </div>
-        <div className="hero-visual">
-          <img src="/hero-fashion.svg" alt="Fashion illustration" className="hero-image" />
+        <div className="scroll-indicator">
+          <span>Scroll to explore</span>
+          <div className="scroll-line"></div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="features-section">
-        <h2 className="section-title">Everything You Need to Build Your Perfect Wardrobe</h2>
-        
-        <div className="features-grid">
-          <div className="feature-card">
-            <h3>Organize Your Closets</h3>
-            <p>
-              Create multiple collections for different occasions—work clothes, 
-              casual wear, formal attire, and more. Keep everything organized and accessible.
-            </p>
-          </div>
-
-          <div className="feature-card">
-            <h3>AI-Powered Style Assistant</h3>
-            <p>
-              Chat naturally about your style preferences, occasions, and budget. 
-              Our AI understands context and helps you find exactly what you're looking for.
-            </p>
-          </div>
-
-          <div className="feature-card">
-            <h3>Visual Inspiration</h3>
-            <p>
-              Upload photos of styles you love. Our AI analyzes the aesthetics, 
-              colors, and patterns to find similar options that match your taste.
-            </p>
-          </div>
-
-          <div className="feature-card">
-            <h3>Smart Filtering</h3>
-            <p>
-              Set your price range, favorite brands, clothing purpose (athletic, casual, formal), 
-              size preferences, and desired aesthetics for perfectly curated results.
-            </p>
-          </div>
-
-          <div className="feature-card">
-            <h3>Shop with Confidence</h3>
-            <p>
-              Every recommendation includes purchase links from reputable retailers. 
-              Compare prices and options across multiple trusted shopping sites.
-            </p>
-          </div>
-
-          <div className="feature-card">
-            <h3>Personalized Recommendations</h3>
-            <p>
-              Get clothing suggestions tailored to your unique style, body type, 
-              and preferences. Build a wardrobe that truly reflects who you are.
-            </p>
-          </div>
+      {/* Statement Section */}
+      <section className="statement-section">
+        <div className="statement-content">
+          <h2 className="statement-text">
+            Wardrobe.AI is a new approach to personal styling through AI-powered
+            recommendations and curated collections.
+          </h2>
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="how-it-works">
-        <h2 className="section-title">How It Works</h2>
-        <div className="steps-grid">
-          <div className="step-card">
-            <div className="step-number">1</div>
-            <h3>Create Your Closets</h3>
-            <p>Set up different collections for work, leisure, sports, and special occasions</p>
-          </div>
+      {/* Image + Text Section */}
+      <section className="image-text-section">
+        <div className="image-container">
+          <img src="/hero-fashion.svg" alt="Fashion curation" className="section-image" />
+        </div>
+        <div className="text-content">
+          <h3 className="section-heading">Thoughtful Curation</h3>
+          <p className="section-description">
+            We don't just recommend clothes, we use AI to understand your style,
+            preferences, and needs to create authentic wardrobes that reflect who you are.
+          </p>
+        </div>
+      </section>
 
-          <div className="step-card">
-            <div className="step-number">2</div>
-            <h3>Share Your Vision</h3>
-            <p>Chat with our AI or upload photos of styles you love</p>
-          </div>
+      {/* Features Grid - Minimal */}
+      <section className="features-minimal">
+        <div className="feature-item">
+          <h3>AI-Powered Chat</h3>
+          <p>
+            Conversational styling that understands your aesthetic, budget,
+            and lifestyle to provide personalized recommendations.
+          </p>
+        </div>
+        <div className="feature-item">
+          <h3>Visual Inspiration</h3>
+          <p>
+            Upload photos of styles you love and our AI analyzes colors,
+            patterns, and aesthetics to find similar pieces.
+          </p>
+        </div>
+        <div className="feature-item">
+          <h3>Smart Collections</h3>
+          <p>
+            Organize multiple closets for work, leisure, and special occasions
+            with seamless management and curation.
+          </p>
+        </div>
+        <div className="feature-item">
+          <h3>Curated Shopping</h3>
+          <p>
+            Every recommendation includes links to reputable retailers with
+            price comparisons across trusted shopping sites.
+          </p>
+        </div>
+      </section>
 
-          <div className="step-card">
-            <div className="step-number">3</div>
-            <h3>Get Recommendations</h3>
-            <p>Receive personalized clothing options based on your preferences</p>
+      {/* Gallery Section - Side by Side */}
+      <section className="gallery-minimal">
+        <div className="gallery-row">
+          <div className="gallery-col">
+            <img src="/fashion-1.svg" alt="Elegant style" />
+            <p className="gallery-caption">Elegant & Formal</p>
           </div>
-
-          <div className="step-card">
-            <div className="step-number">4</div>
-            <h3>Shop & Build</h3>
-            <p>Browse options, compare prices, and add to your digital wardrobe</p>
+          <div className="gallery-col">
+            <img src="/fashion-2.svg" alt="Casual style" />
+            <p className="gallery-caption">Casual & Comfortable</p>
+          </div>
+          <div className="gallery-col">
+            <img src="/fashion-3.svg" alt="Professional style" />
+            <p className="gallery-caption">Professional & Polished</p>
           </div>
         </div>
       </section>
 
-      {/* Fashion Gallery */}
-      <section className="gallery-section">
-        <h2 className="section-title">Style for Every Occasion</h2>
-        <div className="gallery-grid">
-          <div className="gallery-item">
-            <img src="/picture1.jpg" alt="Elegant dress" />
-            <div className="gallery-label">Elegant & Formal</div>
-          </div>
-          <div className="gallery-item">
-            <img src="/picture2.jpg" alt="Casual outfit" />
-            <div className="gallery-label">Casual & Comfortable</div>
-          </div>
-          <div className="gallery-item">
-            <img src="/picture3.jpg" alt="Atheltic attire" />
-            <div className="gallery-label">Atheltic Wear</div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="cta-section">
-        <div className="cta-content">
-          <h2>Ready to Transform Your Wardrobe?</h2>
-          <p>Start building your personalized clothing collection today</p>
-          <button 
-            className="cta-button" 
-            onClick={() => onNavigate('wardrobe')}
-          >
-            Get Started Free
-          </button>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="footer">
-        <div className="footer-content">
-          <div className="footer-brand">
-            <div className="footer-logo">Wardrobe.AI</div>
-            <p>Your personal AI-powered style assistant</p>
-          </div>
-          <div className="footer-links">
-            <div className="footer-column">
-              <h4>Product</h4>
-              <a href="#features">Features</a>
-              <a href="#how-it-works">How It Works</a>
-              <a href="#pricing">Pricing</a>
+      {/* Approach Section */}
+      <section className="approach-section">
+        <div className="approach-content">
+          <h2 className="approach-title">Our Approach</h2>
+          <div className="approach-grid">
+            <div className="approach-item">
+              <h4>Listen</h4>
+              <p>We understand your style preferences, body type, and lifestyle through natural conversation.</p>
             </div>
-            <div className="footer-column">
-              <h4>Company</h4>
-              <a href="#about">About</a>
-              <a href="#contact">Contact</a>
-              <a href="#privacy">Privacy</a>
+            <div className="approach-item">
+              <h4>Analyze</h4>
+              <p>Our AI processes your inputs, uploaded images, and preferences to build your unique style profile.</p>
             </div>
+            <div className="approach-item">
+              <h4>Curate</h4>
+              <p>We generate personalized recommendations filtered by price, brand, purpose, and aesthetics.</p>
+            </div>
+            <div className="approach-item">
+              <h4>Evolve</h4>
+              <p>Your wardrobe grows and adapts as we learn more about your style over time.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section - Large */}
+      <section className="cta-large">
+        <h2 className="cta-heading">
+          Ready to transform
+          <br />
+          your wardrobe?
+        </h2>
+        <button className="cta-button-large" onClick={() => onNavigate('wardrobe')}>
+          Start Building Your Style
+        </button>
+      </section>
+
+      {/* Footer - Minimal */}
+      <footer className="footer-minimal">
+        <div className="footer-grid">
+          <div className="footer-col">
+            <h3 className="footer-brand">Wardrobe.AI</h3>
+            <p className="footer-tagline">
+              Your personal AI-powered style assistant
+            </p>
+          </div>
+          <div className="footer-col">
+            <h4>Product</h4>
+            <a href="#features">Features</a>
+            <a href="#approach">Approach</a>
+            <a href="#pricing">Pricing</a>
+          </div>
+          <div className="footer-col">
+            <h4>Company</h4>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+            <a href="#careers">Careers</a>
+          </div>
+          <div className="footer-col">
+            <h4>Connect</h4>
+            <a href="#newsletter">Newsletter</a>
+            <a href="#instagram">Instagram</a>
+            <a href="#twitter">Twitter</a>
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; 2024 Wardrobe.AI. All rights reserved.</p>
+          <p>© 2024 Wardrobe.AI. All rights reserved.</p>
         </div>
       </footer>
     </div>
