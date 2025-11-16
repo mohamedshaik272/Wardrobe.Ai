@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+python-multipart
+Pillow
+torch==1.13.1
+torchvision==0.14.1
+numpy==1.23.5
+opencv-python
+scikit-image
+dlib
+face_alignment
+scipy
+scikit-learn
