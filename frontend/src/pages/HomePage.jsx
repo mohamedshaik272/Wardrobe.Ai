@@ -19,15 +19,6 @@ function HomePage({ onNavigate }) {
         <div className="nav-content">
           <div className="logo">Wardrobe.AI</div>
           <div className="nav-links">
-            <a href="#approach" className="nav-link">
-              Approach
-            </a>
-            <a href="#features" className="nav-link">
-              Features
-            </a>
-            <a href="#about" className="nav-link">
-              About
-            </a>
             <button
               className="nav-btn primary"
               onClick={() => onNavigate("wardrobe")}

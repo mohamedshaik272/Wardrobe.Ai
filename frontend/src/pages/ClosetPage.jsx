@@ -1,23 +1,23 @@
-import { useState } from 'react';
-import './ClosetPage.css';
+import { useState } from "react";
+import "./ClosetPage.css";
 
 function ClosetPage({ closet, onNavigate }) {
   const [messages, setMessages] = useState([
-    { 
-      id: 1, 
-      type: 'ai', 
-      text: `Hi! I'm your AI stylist. I'll help you find clothes for your "${closet.name}" collection. Tell me what you're looking for!` 
-    }
+    {
+      id: 1,
+      type: "ai",
+      text: `Hi! I'm your AI stylist. I'll help you find clothes for your "${closet.name}" collection. Tell me what you're looking for!`,
+    },
   ]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
   const [uploadedImages, setUploadedImages] = useState([]);
   const [preferences, setPreferences] = useState({
-    minPrice: '',
-    maxPrice: '',
-    brands: '',
-    purpose: 'casual',
-    size: '',
-    itemCount: 5
+    minPrice: "",
+    maxPrice: "",
+    brands: "",
+    purpose: "casual",
+    size: "",
+    itemCount: 5,
   });
   const [generatedItems, setGeneratedItems] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -25,10 +25,10 @@ function ClosetPage({ closet, onNavigate }) {
 
   // Mock shopping links for demonstration
   const mockShoppingLinks = [
-    { store: 'Amazon Fashion', url: '#', price: '$29.99' },
-    { store: 'Nordstrom', url: '#', price: '$34.99' },
-    { store: 'ASOS', url: '#', price: '$27.50' },
-    { store: 'Zara', url: '#', price: '$32.00' },
+    { store: "Amazon Fashion", url: "#", price: "$29.99" },
+    { store: "Nordstrom", url: "#", price: "$34.99" },
+    { store: "ASOS", url: "#", price: "$27.50" },
+    { store: "Zara", url: "#", price: "$32.00" },
   ];
 
   const handleSendMessage = (e) => {
@@ -36,23 +36,23 @@ function ClosetPage({ closet, onNavigate }) {
     if (inputMessage.trim()) {
       const userMessage = {
         id: Date.now(),
-        type: 'user',
-        text: inputMessage
+        type: "user",
+        text: inputMessage,
       };
-      
+
       setMessages([...messages, userMessage]);
-      
+
       // Simulate AI response
       setTimeout(() => {
         const aiResponse = {
           id: Date.now() + 1,
-          type: 'ai',
-          text: generateAIResponse(inputMessage)
+          type: "ai",
+          text: generateAIResponse(inputMessage),
         };
-        setMessages(prev => [...prev, aiResponse]);
+        setMessages((prev) => [...prev, aiResponse]);
       }, 1000);
-      
-      setInputMessage('');
+
+      setInputMessage("");
     }
   };
 
@@ -62,47 +62,52 @@ function ClosetPage({ closet, onNavigate }) {
       "I understand your style preference. Would you like to see options from specific brands?",
       "Perfect! Let me know your size and I'll generate some recommendations.",
       "That sounds wonderful! Are you looking for casual, athletic, or formal wear?",
-      "Excellent taste! I'll find the best options for you. Any color preferences?"
+      "Excellent taste! I'll find the best options for you. Any color preferences?",
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   };
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newImages = files.map(file => ({
+    const newImages = files.map((file) => ({
       id: Date.now() + Math.random(),
       url: URL.createObjectURL(file),
-      name: file.name
+      name: file.name,
     }));
     setUploadedImages([...uploadedImages, ...newImages]);
 
     // Add AI message about uploaded images
     const aiMessage = {
       id: Date.now(),
-      type: 'ai',
-      text: `I see you've uploaded ${files.length} image(s)! I'll analyze the style and find similar options for you.`
+      type: "ai",
+      text: `I see you've uploaded ${files.length} image(s)! I'll analyze the style and find similar options for you.`,
     };
     setMessages([...messages, aiMessage]);
   };
 
   const handleRemoveImage = (id) => {
-    setUploadedImages(uploadedImages.filter(img => img.id !== id));
+    setUploadedImages(uploadedImages.filter((img) => img.id !== id));
   };
 
   const handleGenerate = () => {
     setIsGenerating(true);
-    
+
     // Simulate API call
     setTimeout(() => {
-      const mockItems = Array.from({ length: preferences.itemCount }, (_, i) => ({
-        id: Date.now() + i,
-        name: `Stylish ${preferences.purpose} wear ${i + 1}`,
-        image: `https://via.placeholder.com/300x400/667eea/ffffff?text=Item+${i + 1}`,
-        price: `$${(Math.random() * 50 + 20).toFixed(2)}`,
-        brand: preferences.brands || 'Various Brands',
-        description: `Perfect for ${preferences.purpose} occasions`
-      }));
-      
+      const mockItems = Array.from(
+        { length: preferences.itemCount },
+        (_, i) => ({
+          id: Date.now() + i,
+          name: `Stylish ${preferences.purpose} wear ${i + 1}`,
+          image: `https://via.placeholder.com/300x400/667eea/ffffff?text=Item+${
+            i + 1
+          }`,
+          price: `$${(Math.random() * 50 + 20).toFixed(2)}`,
+          brand: preferences.brands || "Various Brands",
+          description: `Perfect for ${preferences.purpose} occasions`,
+        })
+      );
+
       setGeneratedItems(mockItems);
       setIsGenerating(false);
     }, 2000);
@@ -112,7 +117,7 @@ function ClosetPage({ closet, onNavigate }) {
     <div className="closet-page">
       {/* Header */}
       <div className="closet-header">
-        <button className="back-btn" onClick={() => onNavigate('wardrobe')}>
+        <button className="back-btn" onClick={() => onNavigate("wardrobe")}>
           ← Back to Wardrobe
         </button>
         <h1>{closet.name}</h1>
@@ -126,12 +131,11 @@ function ClosetPage({ closet, onNavigate }) {
             <h2>AI Stylist Chat</h2>
             <div className="chat-messages">
               {messages.map((message) => (
-                <div 
-                  key={message.id} 
-                  className={`message ${message.type}`}
-                >
+                <div key={message.id} className={`message ${message.type}`}>
                   <div className="message-content">
-                    {message.type === 'ai' && <span className="ai-icon">🤖</span>}
+                    {message.type === "ai" && (
+                      <span className="ai-icon">🤖</span>
+                    )}
                     <p>{message.text}</p>
                   </div>
                 </div>
@@ -145,7 +149,9 @@ function ClosetPage({ closet, onNavigate }) {
                 onChange={(e) => setInputMessage(e.target.value)}
                 className="chat-input"
               />
-              <button type="submit" className="send-btn">Send</button>
+              <button type="submit" className="send-btn">
+                Send
+              </button>
             </form>
           </div>
 
@@ -159,20 +165,20 @@ function ClosetPage({ closet, onNavigate }) {
                 accept="image/*"
                 multiple
                 onChange={handleImageUpload}
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
               />
               <label htmlFor="image-upload" className="upload-label">
                 <div className="upload-icon">📸</div>
                 <p>Click to upload images</p>
               </label>
             </div>
-            
+
             {uploadedImages.length > 0 && (
               <div className="uploaded-images">
                 {uploadedImages.map((image) => (
                   <div key={image.id} className="uploaded-image">
                     <img src={image.url} alt={image.name} />
-                    <button 
+                    <button
                       className="remove-image-btn"
                       onClick={() => handleRemoveImage(image.id)}
                     >
@@ -190,7 +196,7 @@ function ClosetPage({ closet, onNavigate }) {
           {/* Preferences Section */}
           <div className="preferences-section">
             <h2>Preferences</h2>
-            
+
             <div className="preference-group">
               <label>Price Range</label>
               <div className="price-inputs">
@@ -198,7 +204,9 @@ function ClosetPage({ closet, onNavigate }) {
                   type="number"
                   placeholder="Min ($)"
                   value={preferences.minPrice}
-                  onChange={(e) => setPreferences({...preferences, minPrice: e.target.value})}
+                  onChange={(e) =>
+                    setPreferences({ ...preferences, minPrice: e.target.value })
+                  }
                   className="price-input"
                 />
                 <span>-</span>
@@ -206,7 +214,9 @@ function ClosetPage({ closet, onNavigate }) {
                   type="number"
                   placeholder="Max ($)"
                   value={preferences.maxPrice}
-                  onChange={(e) => setPreferences({...preferences, maxPrice: e.target.value})}
+                  onChange={(e) =>
+                    setPreferences({ ...preferences, maxPrice: e.target.value })
+                  }
                   className="price-input"
                 />
               </div>
@@ -218,7 +228,9 @@ function ClosetPage({ closet, onNavigate }) {
                 type="text"
                 placeholder="e.g., Nike, Adidas, Zara"
                 value={preferences.brands}
-                onChange={(e) => setPreferences({...preferences, brands: e.target.value})}
+                onChange={(e) =>
+                  setPreferences({ ...preferences, brands: e.target.value })
+                }
                 className="text-input"
               />
             </div>
@@ -227,7 +239,9 @@ function ClosetPage({ closet, onNavigate }) {
               <label>Purpose</label>
               <select
                 value={preferences.purpose}
-                onChange={(e) => setPreferences({...preferences, purpose: e.target.value})}
+                onChange={(e) =>
+                  setPreferences({ ...preferences, purpose: e.target.value })
+                }
                 className="select-input"
               >
                 <option value="casual">Casual/Leisure</option>
@@ -242,7 +256,9 @@ function ClosetPage({ closet, onNavigate }) {
                 type="text"
                 placeholder="e.g., M, L, XL"
                 value={preferences.size}
-                onChange={(e) => setPreferences({...preferences, size: e.target.value})}
+                onChange={(e) =>
+                  setPreferences({ ...preferences, size: e.target.value })
+                }
                 className="text-input"
               />
             </div>
@@ -254,17 +270,22 @@ function ClosetPage({ closet, onNavigate }) {
                 min="1"
                 max="20"
                 value={preferences.itemCount}
-                onChange={(e) => setPreferences({...preferences, itemCount: parseInt(e.target.value)})}
+                onChange={(e) =>
+                  setPreferences({
+                    ...preferences,
+                    itemCount: parseInt(e.target.value),
+                  })
+                }
                 className="number-input"
               />
             </div>
 
-            <button 
+            <button
               className="generate-btn"
               onClick={handleGenerate}
               disabled={isGenerating}
             >
-              {isGenerating ? 'Generating...' : '✨ Generate Recommendations'}
+              {isGenerating ? "Generating..." : "✨ Generate Recommendations"}
             </button>
           </div>
 
@@ -274,8 +295,8 @@ function ClosetPage({ closet, onNavigate }) {
               <h2>Your Recommendations</h2>
               <div className="items-grid">
                 {generatedItems.map((item) => (
-                  <div 
-                    key={item.id} 
+                  <div
+                    key={item.id}
                     className="item-card"
                     onClick={() => setSelectedItem(item)}
                   >
@@ -297,17 +318,26 @@ function ClosetPage({ closet, onNavigate }) {
       {selectedItem && (
         <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedItem(null)}>×</button>
+            <button
+              className="modal-close"
+              onClick={() => setSelectedItem(null)}
+            >
+              ×
+            </button>
             <h2>{selectedItem.name}</h2>
-            <img src={selectedItem.image} alt={selectedItem.name} className="modal-image" />
+            <img
+              src={selectedItem.image}
+              alt={selectedItem.name}
+              className="modal-image"
+            />
             <p className="modal-description">{selectedItem.description}</p>
-            
+
             <h3>Shop This Item</h3>
             <div className="shopping-links">
               {mockShoppingLinks.map((link, index) => (
-                <a 
-                  key={index} 
-                  href={link.url} 
+                <a
+                  key={index}
+                  href={link.url}
                   className="shopping-link"
                   target="_blank"
                   rel="noopener noreferrer"

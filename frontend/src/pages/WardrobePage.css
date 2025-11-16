@@ -1,358 +1,416 @@
-/* ==================== WARDROBE PAGE ==================== */
+/* ==================== WARDROBE PAGE (HomePage Style Match) ==================== */
 :root {
   --blue-bell: #1e91d6;
-  --twitter-blue: #0072bb;
-  --yellow-green: #8fc93a;
-  --golden-glow: #e4cc37;
-  --golden-chestnut: #e18335;
+  --twitter-blue: #0072bb; /* Added from HomePage.css for consistency */
+  --golden-glow: #e4cc37; /* Added from HomePage.css for consistency */
+  /* ... (other variables) ... */
+  --dark-navy: #0a2540; /* Primary Text Color */
+  --light-gray: #f5f7fa; /* Page Background */
+  --light-border: #e0e0e0;
 }
 
 .wardrobe-page {
   min-height: 100vh;
-  background: #f5f7fa;
-  display: flex;
-  flex-direction: column;
+  background: var(--light-gray);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  color: var(--dark-navy);
+  padding-top: 80px; /* Space for fixed navbar */
 }
 
-.wardrobe-header {
-  background: linear-gradient(135deg, var(--blue-bell) 0%, var(--twitter-blue) 100%);
-  padding: 2rem;
-  color: white;
+/* ==================== NAVBAR (Matching HomePage) ==================== */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 1.5rem 4rem; /* Adjusted for consistency */
+  background: transparent;
+  transition: all 0.4s ease;
+  border-bottom: 1px solid transparent;
 }
 
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
+.navbar.scrolled {
+  background: rgba(255, 255, 255, 0.98);
+  padding: 1rem 4rem; /* Smaller padding on scroll */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--light-border);
+}
+
+.nav-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  max-width: 1200px; /* Match HomePage max width */
+  margin: 0 auto;
 }
 
-.wardrobe-header h1 {
-  font-size: 2.5rem;
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--dark-navy);
+  cursor: pointer;
 }
 
-.plan-badge {
-  padding: 0.6rem 1.5rem;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* Separator for button and counter */
+}
+
+/* New: Closet Count Counter Pill */
+.closet-counter-pill {
+    background: var(--blue-bell);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    min-width: 40px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(30, 145, 214, 0.3); /* Blue-bell shadow */
+}
+
+.nav-link.current-view {
+  color: var(--blue-bell);
+  font-weight: 600;
+  border-bottom: 2px solid var(--blue-bell);
+  padding-bottom: 5px;
+}
+
+.nav-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.nav-btn.primary {
+  background: var(--blue-bell);
+  color: white;
+}
+
+.nav-btn.primary:hover:not(:disabled) { /* Modified hover to exclude disabled state */
+  background: var(--twitter-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for disabled button */
+.nav-btn.primary:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ==================== BANNER/HEADER ==================== */
+.wardrobe-banner {
+  padding: 4rem 4rem 2rem 4rem;
+  background: white;
+  border-bottom: 1px solid var(--light-border);
+}
+
+.banner-content {
+  max-width: 1200px; 
+  margin: 0 auto;
+}
+
+.banner-content h1 {
+  font-size: 3rem;
+  color: var(--dark-navy);
+  margin-bottom: 0.5rem;
+}
+
+.tagline {
+  font-size: 1.2rem;
+  color: #667eea; /* A softer shade for tagline */
+  margin-bottom: 1.5rem;
+}
+
+.status-badge {
+  padding: 0.5rem 1rem;
   border-radius: 20px;
   font-weight: 600;
+  font-size: 0.9rem;
+  background: #f0f4f8;
+  color: #667eea;
 }
 
-.free-plan {
-  color: #fff;
+.status-badge.premium {
+  background: var(--golden-glow);
+  color: var(--dark-navy);
 }
 
-.premium-plan {
-  color: var(--golden-glow);
-}
-
-.wardrobe-content {
+/* ==================== MAIN CONTENT & GRID ==================== */
+.wardrobe-main-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 3rem 2rem;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  padding: 2rem 4rem;
 }
 
-.closets-container {
+.wardrobe-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.wardrobe-actions h2 {
+  font-size: 2rem;
+  color: var(--dark-navy);
+  /* Removed margin-bottom: 1rem; from media query */
+}
+
+/* New: Empty State Styling */
+.empty-state-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 6rem 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin-top: 4rem;
+}
+
+.empty-state-container h3 {
+    font-size: 2rem;
+    color: var(--dark-navy);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.empty-state-container p {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 2rem;
+    max-width: 500px;
+}
+
+.empty-icon {
+    width: 60px;
+    height: 60px;
+    color: var(--blue-bell);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state-btn {
+    padding: 1rem 2.5rem;
+}
+
+.max-closet-message {
+    color: #e18335 !important;
+    font-weight: 600;
+}
+
+/* Existing: Closet Grid Styling */
+.closet-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
-  margin-bottom: 3rem;
-  flex: 1;
 }
 
-.closet-item {
+/* Closet Card Styling */
+.closet-card {
   background: white;
-  border-radius: 20px;
-  padding: 2rem;
-  border: 3px solid #e0e0e0;
-  transition: all 0.3s ease;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s, box-shadow 0.3s;
   cursor: pointer;
-  position: relative;
   min-height: 250px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 
-.closet-item:hover {
+.closet-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.61);
-  border-color: var(--blue-bell);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
-.closet-content {
-  text-align: center;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.card-header {
+  height: 10px; /* Thin color line at the top */
+  background-color: var(--closet-color);
 }
 
-.closet-icon-large {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 1rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5rem;
+.card-content {
+  padding: 1.5rem;
 }
 
-.closet-item h3 {
-  font-size: 1.4rem;
-  color: #333;
+.closet-name {
+  font-size: 1.5rem;
+  color: var(--dark-navy);
   margin-bottom: 0.5rem;
 }
 
 .item-count {
-  color: #666;
-  font-size: 0.95rem;
-}
-
-.delete-btn {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: #ff4444;
-  border: none;
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: all 0.3s ease;
-  color: white;
-}
-
-.closet-item:hover .delete-btn {
-  opacity: 1;
-}
-
-.delete-btn:hover {
-  transform: scale(1.1);
-  background: #ff2222;
-}
-
-.create-new {
-  border: 3px dashed var(--blue-bell);
-  background: rgba(30, 145, 214, 0.05);
-}
-
-.create-new:hover {
-  background: rgba(30, 145, 214, 0.1);
-  border-color: var(--twitter-blue);
-}
-
-.create-icon {
-  font-size: 4rem;
-  color: var(--blue-bell);
-  margin-bottom: 1rem;
-}
-
-.create-form {
-  cursor: default;
-}
-
-.create-form:hover {
-  transform: none;
-}
-
-.closet-form {
-  width: 100%;
-}
-
-.closet-form h3 {
-  margin-bottom: 1.5rem;
-  text-align: center;
-  color: #333;
-}
-
-.closet-name-input {
-  width: 100%;
-  padding: 1rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
   font-size: 1rem;
-  margin-bottom: 1rem;
-  background: #ffffff; 
-  color: #333;         
-}
-
-
-.closet-name-input:focus {
-  outline: none;
-  border-color: var(--blue-bell);
-}
-
-.color-picker {
+  color: #667eea;
   margin-bottom: 1.5rem;
 }
 
-.color-picker label {
-  display: block;
-  color: #666;
-  margin-bottom: 0.8rem;
-  font-size: 0.9rem;
-}
-
-.color-options {
-  display: flex;
-  gap: 0.8rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.color-option {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.color-option:hover {
-  transform: scale(1.1);
-}
-
-.color-option.selected {
-  border-color: #333;
-  box-shadow: 0 0 0 3px rgba(30, 145, 214, 0.2);
-}
-
-.form-buttons {
-  display: flex;
-  gap: 0.8rem;
-}
-
-.create-submit-btn,
-.cancel-form-btn {
-  flex: 1;
-  padding: 0.9rem;
+.view-btn {
+  background: none;
   border: none;
-  border-radius: 10px;
+  color: var(--blue-bell);
   font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: color 0.2s;
+  padding: 0;
 }
 
-.create-submit-btn {
-  background: linear-gradient(135deg, var(--blue-bell), var(--twitter-blue));
-  color: white;
-}
-
-.create-submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(30, 145, 214, 0.3);
-}
-
-.cancel-form-btn {
-  background: #f0f0f0;
-  color: #666;
-}
-
-.cancel-form-btn:hover {
-  background: #e0e0e0;
-}
-
-.upgrade-cta {
-  background: linear-gradient(135deg, var(--yellow-green), var(--golden-glow));
-  color: white;
-  padding: 3rem;
-  border-radius: 20px;
-  text-align: center;
-}
-
-.upgrade-cta h3 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-.upgrade-cta p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-}
-
-.upgrade-btn {
-  padding: 1rem 3rem;
-  background: white;
+.view-btn:hover {
   color: var(--twitter-blue);
-  border: none;
-  border-radius: 50px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
 }
 
-.upgrade-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  background: var(--golden-chestnut);
-  color: white;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 4rem 2rem;
-  flex: 1;
+/* Upgrade CTA Card */
+.upgrade-cta {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  text-align: center;
+  background: var(--light-gray);
+  border: 2px dashed #ccc;
+  min-height: 250px;
+  padding: 2rem;
 }
 
-.empty-icon {
-  font-size: 5rem;
-  margin-bottom: 1rem;
+.upgrade-cta h3 {
+  color: var(--dark-navy);
+  margin-bottom: 0.5rem;
 }
 
-.empty-state h2 {
-  color: #333;
-  margin-bottom: 1rem;
-}
-
-.empty-state p {
+.upgrade-cta p {
+  font-size: 1rem;
   color: #666;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
-.create-first-btn {
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, var(--blue-bell), var(--twitter-blue));
-  color: white;
-  border: none;
+/* ==================== CREATE FORM STYLING ==================== */
+.create-closet-form-container {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+  max-width: 600px;
+}
+
+.create-closet-form-container h3 {
+  font-size: 1.5rem;
+  color: var(--dark-navy);
+  margin-bottom: 1.5rem;
+}
+
+.create-closet-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.create-closet-form label {
+  display: block;
+  font-weight: 600;
+  color: var(--dark-navy);
+  margin-bottom: 0.5rem;
+}
+
+.create-closet-form input[type="text"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--light-border);
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+.color-options {
+  display: flex;
+  gap: 10px;
+}
+
+.color-option {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.color-option.selected {
+  border-color: var(--dark-navy);
+  box-shadow: 0 0 0 4px rgba(30, 145, 214, 0.4); /* Blue-bell shadow */
+}
+
+.form-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.create-submit-btn,
+.cancel-form-btn {
+  padding: 0.75rem 2rem;
   border-radius: 50px;
-  font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex: 1;
 }
 
-.create-first-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(30, 145, 214, 0.3);
+.create-submit-btn {
+  background: var(--blue-bell);
+  color: white;
+  border: none;
 }
+
+.create-submit-btn:hover {
+  background: var(--twitter-blue);
+}
+
+.cancel-form-btn {
+  background: #fff;
+  color: var(--dark-navy);
+  border: 1px solid var(--light-border);
+}
+
+.cancel-form-btn:hover {
+  background: var(--light-gray);
+}
+
 
 /* ==================== RESPONSIVE ==================== */
-@media (max-width: 768px) {
-  .closets-container {
-    grid-template-columns: 1fr;
+@media (max-width: 968px) {
+  .navbar,
+  .navbar.scrolled {
+    padding: 1rem 2rem;
+  }
+  
+  .wardrobe-banner {
+    padding: 4rem 2rem 2rem 2rem;
+  }
+  
+  .wardrobe-main-content {
+    padding: 2rem;
   }
 
-  .header-content {
+  .wardrobe-actions {
     flex-direction: column;
-    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .wardrobe-actions h2 {
+    margin-bottom: 1rem;
+  }
+
+  .closet-counter-pill {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    min-width: 35px;
   }
 }
