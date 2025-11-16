@@ -35,10 +35,10 @@ function HomePage({ onNavigate }) {
           <h1 className="hero-title">
             Your Personal
             <br />
-            AI Stylist
+            Stylist
           </h1>
           <p className="hero-tagline">
-            Creating personalized wardrobes with and for you to define
+            Creating personalized wardrobe with and for you to define
             <br />
             the future of your style
           </p>
@@ -62,7 +62,7 @@ function HomePage({ onNavigate }) {
       {/* Image + Text Section */}
       <section className="image-text-section">
         <div className="image-container">
-          <img src="/hero-fashion.svg" alt="Fashion curation" className="section-image" />
+          <img src="/fashion-curation.jpg" alt="Fashion curation" className="section-image" />
         </div>
         <div className="text-content">
           <h3 className="section-heading">Thoughtful Curation</h3>
@@ -109,16 +109,16 @@ function HomePage({ onNavigate }) {
       <section className="gallery-minimal">
         <div className="gallery-row">
           <div className="gallery-col">
-            <img src="/fashion-1.svg" alt="Elegant style" />
+            <img src="/picture5.jpg" alt="Elegant style" />
             <p className="gallery-caption">Elegant & Formal</p>
           </div>
           <div className="gallery-col">
-            <img src="/fashion-2.svg" alt="Casual style" />
+            <img src="/picture2.jpg" alt="Casual style" />
             <p className="gallery-caption">Casual & Comfortable</p>
           </div>
           <div className="gallery-col">
-            <img src="/fashion-3.svg" alt="Professional style" />
-            <p className="gallery-caption">Professional & Polished</p>
+            <img src="/picture3.jpg" alt="Atheltic" />
+            <p className="gallery-caption">Athelitc Wear</p>
           </div>
         </div>
       </section>
@@ -159,39 +159,6 @@ function HomePage({ onNavigate }) {
           Start Building Your Style
         </button>
       </section>
-
-      {/* Footer - Minimal */}
-      <footer className="footer-minimal">
-        <div className="footer-grid">
-          <div className="footer-col">
-            <h3 className="footer-brand">Wardrobe.AI</h3>
-            <p className="footer-tagline">
-              Your personal AI-powered style assistant
-            </p>
-          </div>
-          <div className="footer-col">
-            <h4>Product</h4>
-            <a href="#features">Features</a>
-            <a href="#approach">Approach</a>
-            <a href="#pricing">Pricing</a>
-          </div>
-          <div className="footer-col">
-            <h4>Company</h4>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
-            <a href="#careers">Careers</a>
-          </div>
-          <div className="footer-col">
-            <h4>Connect</h4>
-            <a href="#newsletter">Newsletter</a>
-            <a href="#instagram">Instagram</a>
-            <a href="#twitter">Twitter</a>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>© 2024 Wardrobe.AI. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 }
