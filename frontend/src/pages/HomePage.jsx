@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import './HomePage.css';
+import { useState, useEffect } from "react";
+import "./HomePage.css";
 
 function HomePage({ onNavigate }) {
   const [scrolled, setScrolled] = useState(false);
@@ -8,21 +8,30 @@ function HomePage({ onNavigate }) {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <div className="home-page">
       {/* Navigation Bar */}
-      <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+      <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
         <div className="nav-content">
           <div className="logo">Wardrobe.AI</div>
           <div className="nav-links">
-            <a href="#approach" className="nav-link">Approach</a>
-            <a href="#features" className="nav-link">Features</a>
-            <a href="#about" className="nav-link">About</a>
-            <button className="nav-btn primary" onClick={() => onNavigate('wardrobe')}>
+            <a href="#approach" className="nav-link">
+              Approach
+            </a>
+            <a href="#features" className="nav-link">
+              Features
+            </a>
+            <a href="#about" className="nav-link">
+              About
+            </a>
+            <button
+              className="nav-btn primary"
+              onClick={() => onNavigate("wardrobe")}
+            >
               Get Started
             </button>
           </div>
@@ -62,13 +71,18 @@ function HomePage({ onNavigate }) {
       {/* Image + Text Section */}
       <section className="image-text-section">
         <div className="image-container">
-          <img src="/fashion-curation.jpg" alt="Fashion curation" className="section-image" />
+          <img
+            src="/fashion-curation.jpg"
+            alt="Fashion curation"
+            className="section-image"
+          />
         </div>
         <div className="text-content">
           <h3 className="section-heading">Thoughtful Curation</h3>
           <p className="section-description">
             We don't just recommend clothes, we use AI to understand your style,
-            preferences, and needs to create authentic wardrobes that reflect who you are.
+            preferences, and needs to create authentic wardrobes that reflect
+            who you are.
           </p>
         </div>
       </section>
@@ -78,8 +92,8 @@ function HomePage({ onNavigate }) {
         <div className="feature-item">
           <h3>AI-Powered Chat</h3>
           <p>
-            Conversational styling that understands your aesthetic, budget,
-            and lifestyle to provide personalized recommendations.
+            Conversational styling that understands your aesthetic, budget, and
+            lifestyle to provide personalized recommendations.
           </p>
         </div>
         <div className="feature-item">
@@ -105,20 +119,44 @@ function HomePage({ onNavigate }) {
         </div>
       </section>
 
-      {/* Gallery Section - Side by Side */}
-      <section className="gallery-minimal">
-        <div className="gallery-row">
-          <div className="gallery-col">
-            <img src="/picture5.jpg" alt="Elegant style" />
-            <p className="gallery-caption">Elegant & Formal</p>
+      {/* Gallery Section - Modern Stacked Cards */}
+      <section className="gallery-modern">
+        <div className="gallery-grid">
+          {/* Elegant & Formal */}
+          <div className="style-card">
+            <h3 className="style-title">Elegant & Formal</h3>
+            <p className="style-description">
+              Clean, structured pieces designed for elevated events and
+              sophisticated moments.
+            </p>
+            <img src="/picture5.jpg" className="style-img" />
+            <img src="/picture6.jpg" className="style-img" />
+            <img src="/picture7.jpg" className="style-img" />
           </div>
-          <div className="gallery-col">
-            <img src="/picture2.jpg" alt="Casual style" />
-            <p className="gallery-caption">Casual & Comfortable</p>
+
+          {/* Casual & Comfortable */}
+          <div className="style-card">
+            <h3 className="style-title">Casual & Comfortable</h3>
+            <p className="style-description">
+              Laid‑back everyday looks built around softness, simplicity, and
+              effortless wear.
+            </p>
+            <img src="/picture2.jpg" className="style-img" />
+            <img src="/picture4.jpg" className="style-img" />
+            <img src="/picture12.jpg" className="style-img" />
           </div>
-          <div className="gallery-col">
-            <img src="/picture3.jpg" alt="Atheltic" />
-            <p className="gallery-caption">Athelitc Wear</p>
+
+          {/* Athletic Wear */}
+          <div className="style-card">
+            <h3 className="style-title">Athletic Wear</h3>
+            <p className="style-description">
+              High‑performance fits crafted for movement, comfort, and active
+              lifestyles.
+            </p>
+            <img src="/picture3.jpg" className="style-img" />
+            <img src="/picture9.jpg" className="style-img" />
+            <img src="/picture10.jpg" className="style-img" />
+            <img src="/picture11.jpg" className="style-img" />
           </div>
         </div>
       </section>
@@ -130,19 +168,31 @@ function HomePage({ onNavigate }) {
           <div className="approach-grid">
             <div className="approach-item">
               <h4>Listen</h4>
-              <p>We understand your style preferences, body type, and lifestyle through natural conversation.</p>
+              <p>
+                We understand your style preferences, body type, and lifestyle
+                through natural conversation.
+              </p>
             </div>
             <div className="approach-item">
               <h4>Analyze</h4>
-              <p>Our AI processes your inputs, uploaded images, and preferences to build your unique style profile.</p>
+              <p>
+                Our AI processes your inputs, uploaded images, and preferences
+                to build your unique style profile.
+              </p>
             </div>
             <div className="approach-item">
               <h4>Curate</h4>
-              <p>We generate personalized recommendations filtered by price, brand, purpose, and aesthetics.</p>
+              <p>
+                We generate personalized recommendations filtered by price,
+                brand, purpose, and aesthetics.
+              </p>
             </div>
             <div className="approach-item">
               <h4>Evolve</h4>
-              <p>Your wardrobe grows and adapts as we learn more about your style over time.</p>
+              <p>
+                Your wardrobe grows and adapts as we learn more about your style
+                over time.
+              </p>
             </div>
           </div>
         </div>
@@ -155,7 +205,10 @@ function HomePage({ onNavigate }) {
           <br />
           your wardrobe?
         </h2>
-        <button className="cta-button-large" onClick={() => onNavigate('wardrobe')}>
+        <button
+          className="cta-button-large"
+          onClick={() => onNavigate("wardrobe")}
+        >
           Start Building Your Style
         </button>
       </section>
