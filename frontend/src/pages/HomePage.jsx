@@ -120,9 +120,22 @@ function HomePage({ onNavigate }) {
               Clean, structured pieces designed for elevated events and
               sophisticated moments.
             </p>
-            <img src="/picture5.jpg" className="style-img" />
-            <img src="/picture6.jpg" className="style-img" />
-            <img src="/picture7.jpg" className="style-img" />
+            <div className="carousel-container">
+              <div className="carousel-left-subcontainer">
+                <img src="/picture5.jpg" alt="Elegant style 1" />
+                <img src="/picture6.jpg" alt="Elegant style 2" />
+                <img src="/picture7.jpg" alt="Elegant style 3" />
+                <img src="/picture5.jpg" alt="Elegant style 1" />
+                <img src="/picture6.jpg" alt="Elegant style 2" />
+              </div>
+              <div className="carousel-right-subcontainer">
+                <img src="/picture19.jpg" alt="Elegant style 4" />
+                <img src="/picture20.jpg" alt="Elegant style 5" />
+                <img src="/picture21.jpg" alt="Elegant style 3" />
+                <img src="/picture23.jpg" alt="Elegant style 4" />
+                <img src="/picture24.jpg" alt="Elegant style 5" />
+              </div>
+            </div>
           </div>
 
           {/* Casual & Comfortable */}
@@ -132,9 +145,22 @@ function HomePage({ onNavigate }) {
               Laid‑back everyday looks built around softness, simplicity, and
               effortless wear.
             </p>
-            <img src="/picture2.jpg" className="style-img" />
-            <img src="/picture4.jpg" className="style-img" />
-            <img src="/picture12.jpg" className="style-img" />
+            <div className="carousel-container">
+              <div className="carousel-left-subcontainer">
+                <img src="/picture2.jpg" alt="Casual style 1" />
+                <img src="/picture4.jpg" alt="Casual style 2" />
+                <img src="/picture12.jpg" alt="Casual style 3" />
+                <img src="/picture28.jpg" alt="Casual style 4" />
+                <img src="/picture29.jpg" alt="Casual style 5" />
+              </div>
+              <div className="carousel-right-subcontainer">
+                <img src="/picture15.jpg" alt="Casual style 6" />
+                <img src="/picture16.jpg" alt="Casual style 7" />
+                <img src="/picture25.jpg" alt="Casual style 8" />
+                <img src="/picture26.jpg" alt="Casual style 9" />
+                <img src="/picture27.jpg" alt="Casual style 10" />
+              </div>
+            </div>
           </div>
 
           {/* Athletic Wear */}
@@ -144,10 +170,22 @@ function HomePage({ onNavigate }) {
               High‑performance fits crafted for movement, comfort, and active
               lifestyles.
             </p>
-            <img src="/picture3.jpg" className="style-img" />
-            <img src="/picture9.jpg" className="style-img" />
-            <img src="/picture10.jpg" className="style-img" />
-            <img src="/picture11.jpg" className="style-img" />
+            <div className="carousel-container">
+              <div className="carousel-left-subcontainer">
+                <img src="/picture3.jpg" alt="Athletic style 1" />
+                <img src="/picture9.jpg" alt="Athletic style 2" />
+                <img src="/picture10.jpg" alt="Athletic style 3" />
+                <img src="/picture3.jpg" alt="Athletic style 1" />
+                <img src="/picture9.jpg" alt="Athletic style 2" />
+              </div>
+              <div className="carousel-right-subcontainer">
+                <img src="/picture11.jpg" alt="Athletic style 4" />
+                <img src="/picture17.jpg" alt="Athletic style 5" />
+                <img src="/picture18.jpg" alt="Athletic style 6" />
+                <img src="/picture11.jpg" alt="Athletic style 4" />
+                <img src="/picture17.jpg" alt="Athletic style 5" />
+              </div>
+            </div>
           </div>
         </div>
       </section>

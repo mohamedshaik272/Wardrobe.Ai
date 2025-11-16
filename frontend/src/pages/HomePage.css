@@ -215,7 +215,7 @@
 
 .section-image {
   width: 100%;
-  max-width: 600px;
+  max-width: 900px;
   height: auto;
 }
 
@@ -227,7 +227,7 @@
 }
 
 .section-heading {
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(8rem, 4vw, 3rem);
   font-weight: 300;
   line-height: 1.2;
   letter-spacing: -0.02em;
@@ -236,7 +236,7 @@
 }
 
 .section-description {
-  font-size: 1.25rem;
+  font-size: 2rem;
   font-weight: 300;
   line-height: 1.7;
   color: #666;
@@ -487,12 +487,53 @@
 }
 
 
-.style-img {
+/* Carousel Container */
+.carousel-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  max-height: 500px;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.carousel-left-subcontainer,
+.carousel-right-subcontainer {
+  height: auto;
+  width: 100%;
+  animation: slide 60s linear infinite;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.carousel-left-subcontainer img,
+.carousel-right-subcontainer img {
   width: 100%;
   height: auto;
-  border-radius: 14px;
+  border-radius: 0.5rem;
   object-fit: cover;
   background: #fafafa;
+}
+
+.carousel-right-subcontainer {
+  transform: translateY(-50%);
+}
+
+@keyframes slide {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, -50%, 0);
+  }
+}
+
+/* Pause animation on hover */
+.style-card:hover .carousel-left-subcontainer,
+.style-card:hover .carousel-right-subcontainer {
+  animation-play-state: paused;
 }
 
 
