@@ -32,75 +32,61 @@ function HomePage({ onNavigate }) {
           </button>
         </div>
         <div className="hero-visual">
-          <div className="visual-card">👔</div>
-          <div className="visual-card">👗</div>
-          <div className="visual-card">👟</div>
-          <div className="visual-card">👜</div>
+          <img src="/hero-fashion.svg" alt="Fashion illustration" className="hero-image" />
         </div>
       </section>
 
-      {/* What You Can Do Section */}
-      <section className="capabilities-section">
-        <h2 className="section-title">What You Can Do</h2>
-        <div className="capabilities-grid">
-          <div className="capability-card">
-            <div className="capability-icon">🗂️</div>
-            <h3>Create Multiple Closets</h3>
+      {/* Features Section */}
+      <section className="features-section">
+        <h2 className="section-title">Everything You Need to Build Your Perfect Wardrobe</h2>
+        
+        <div className="features-grid">
+          <div className="feature-card">
+            <h3>Organize Your Closets</h3>
             <p>
-              Organize your wardrobe into different collections - work clothes, 
-              casual wear, formal attire, and more
+              Create multiple collections for different occasions—work clothes, 
+              casual wear, formal attire, and more. Keep everything organized and accessible.
             </p>
-            <span className="capability-badge">Free: 4 closets | Premium: Unlimited</span>
           </div>
 
-          <div className="capability-card">
-            <div className="capability-icon">💬</div>
-            <h3>Chat with AI Stylist</h3>
+          <div className="feature-card">
+            <h3>AI-Powered Style Assistant</h3>
             <p>
-              Describe your style preferences, occasion, budget, and favorite brands. 
-              Our AI understands your needs
+              Chat naturally about your style preferences, occasions, and budget. 
+              Our AI understands context and helps you find exactly what you're looking for.
             </p>
-            <span className="capability-badge">Powered by AI</span>
           </div>
 
-          <div className="capability-card">
-            <div className="capability-icon">📸</div>
-            <h3>Upload Inspiration</h3>
+          <div className="feature-card">
+            <h3>Visual Inspiration</h3>
             <p>
-              Share photos of styles you love. Our AI analyzes the aesthetics 
-              and finds similar options for you
+              Upload photos of styles you love. Our AI analyzes the aesthetics, 
+              colors, and patterns to find similar options that match your taste.
             </p>
-            <span className="capability-badge">Image Recognition</span>
           </div>
 
-          <div className="capability-card">
-            <div className="capability-icon">✨</div>
-            <h3>Get Personalized Recommendations</h3>
+          <div className="feature-card">
+            <h3>Smart Filtering</h3>
             <p>
-              Specify price range, brands, purpose, size, and aesthetics. 
-              Generate curated clothing options instantly
+              Set your price range, favorite brands, clothing purpose (athletic, casual, formal), 
+              size preferences, and desired aesthetics for perfectly curated results.
             </p>
-            <span className="capability-badge">Smart Matching</span>
           </div>
 
-          <div className="capability-card">
-            <div className="capability-icon">🛍️</div>
-            <h3>Shop from Trusted Retailers</h3>
+          <div className="feature-card">
+            <h3>Shop with Confidence</h3>
             <p>
-              Click any recommended item to see purchase links from reputable 
-              online shopping websites
+              Every recommendation includes purchase links from reputable retailers. 
+              Compare prices and options across multiple trusted shopping sites.
             </p>
-            <span className="capability-badge">Multi-Store Search</span>
           </div>
 
-          <div className="capability-card">
-            <div className="capability-icon">🎯</div>
-            <h3>Filter by Your Needs</h3>
+          <div className="feature-card">
+            <h3>Personalized Recommendations</h3>
             <p>
-              Filter by athletics, casual/leisure, or formal wear. Set your budget 
-              and preferred brands for precise results
+              Get clothing suggestions tailored to your unique style, body type, 
+              and preferences. Build a wardrobe that truly reflects who you are.
             </p>
-            <span className="capability-badge">Advanced Filters</span>
           </div>
         </div>
       </section>
@@ -108,75 +94,91 @@ function HomePage({ onNavigate }) {
       {/* How It Works Section */}
       <section className="how-it-works">
         <h2 className="section-title">How It Works</h2>
-        <div className="steps-container">
-          <div className="step">
+        <div className="steps-grid">
+          <div className="step-card">
             <div className="step-number">1</div>
             <h3>Create Your Closets</h3>
-            <p>Set up different collections for different occasions</p>
+            <p>Set up different collections for work, leisure, sports, and special occasions</p>
           </div>
-          <div className="step-arrow">→</div>
-          <div className="step">
+
+          <div className="step-card">
             <div className="step-number">2</div>
-            <h3>Chat & Upload</h3>
-            <p>Tell our AI what you're looking for or upload inspiration photos</p>
+            <h3>Share Your Vision</h3>
+            <p>Chat with our AI or upload photos of styles you love</p>
           </div>
-          <div className="step-arrow">→</div>
-          <div className="step">
+
+          <div className="step-card">
             <div className="step-number">3</div>
-            <h3>Generate Options</h3>
-            <p>Specify how many items you want and let AI curate your choices</p>
+            <h3>Get Recommendations</h3>
+            <p>Receive personalized clothing options based on your preferences</p>
           </div>
-          <div className="step-arrow">→</div>
-          <div className="step">
+
+          <div className="step-card">
             <div className="step-number">4</div>
-            <h3>Shop & Save</h3>
-            <p>Browse recommendations and shop from trusted retailers</p>
+            <h3>Shop & Build</h3>
+            <p>Browse options, compare prices, and add to your digital wardrobe</p>
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="pricing-section">
-        <h2 className="section-title">Choose Your Plan</h2>
-        <div className="pricing-cards">
-          <div className="pricing-card">
-            <h3>Free</h3>
-            <div className="price">$0<span>/month</span></div>
-            <ul className="features-list">
-              <li>✓ Up to 4 closets</li>
-              <li>✓ AI chat stylist</li>
-              <li>✓ Image upload</li>
-              <li>✓ 10 generations/month</li>
-              <li>✓ Shopping links</li>
-            </ul>
-            <button className="pricing-btn secondary" onClick={() => onNavigate('wardrobe')}>
-              Get Started
-            </button>
+      {/* Fashion Gallery */}
+      <section className="gallery-section">
+        <h2 className="section-title">Style for Every Occasion</h2>
+        <div className="gallery-grid">
+          <div className="gallery-item">
+            <img src="/picture1.jpg" alt="Elegant dress" />
+            <div className="gallery-label">Elegant & Formal</div>
           </div>
+          <div className="gallery-item">
+            <img src="/picture2.jpg" alt="Casual outfit" />
+            <div className="gallery-label">Casual & Comfortable</div>
+          </div>
+          <div className="gallery-item">
+            <img src="/picture3.jpg" alt="Atheltic attire" />
+            <div className="gallery-label">Atheltic Wear</div>
+          </div>
+        </div>
+      </section>
 
-          <div className="pricing-card premium">
-            <div className="popular-badge">Most Popular</div>
-            <h3>Premium</h3>
-            <div className="price">$9.99<span>/month</span></div>
-            <ul className="features-list">
-              <li>✓ Unlimited closets</li>
-              <li>✓ AI chat stylist</li>
-              <li>✓ Image upload</li>
-              <li>✓ Unlimited generations</li>
-              <li>✓ Shopping links</li>
-              <li>✓ Priority support</li>
-              <li>✓ Advanced filters</li>
-            </ul>
-            <button className="pricing-btn primary" onClick={() => onNavigate('wardrobe')}>
-              Upgrade Now
-            </button>
-          </div>
+      {/* CTA Section */}
+      <section className="cta-section">
+        <div className="cta-content">
+          <h2>Ready to Transform Your Wardrobe?</h2>
+          <p>Start building your personalized clothing collection today</p>
+          <button 
+            className="cta-button" 
+            onClick={() => onNavigate('wardrobe')}
+          >
+            Get Started Free
+          </button>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="footer">
-        <p>© 2024 Wardrobe.AI - Your Personal AI Stylist</p>
+        <div className="footer-content">
+          <div className="footer-brand">
+            <div className="footer-logo">Wardrobe.AI</div>
+            <p>Your personal AI-powered style assistant</p>
+          </div>
+          <div className="footer-links">
+            <div className="footer-column">
+              <h4>Product</h4>
+              <a href="#features">Features</a>
+              <a href="#how-it-works">How It Works</a>
+              <a href="#pricing">Pricing</a>
+            </div>
+            <div className="footer-column">
+              <h4>Company</h4>
+              <a href="#about">About</a>
+              <a href="#contact">Contact</a>
+              <a href="#privacy">Privacy</a>
+            </div>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <p>&copy; 2024 Wardrobe.AI. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   );
