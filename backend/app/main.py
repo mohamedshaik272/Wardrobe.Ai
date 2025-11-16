@@ -10,6 +10,10 @@ import torchvision.transforms.functional as F
 
 sys.path.insert(0, str(Path("../models/HairFastGAN").resolve()))
 from hair_swap import HairFast, get_parser
+from gradio_client import Client, handle_file
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
 
@@ -29,6 +33,7 @@ UPLOADS.mkdir(parents=True, exist_ok=True)
 GENERATED.mkdir(parents=True, exist_ok=True)
 
 hairfast_model = None
+clothing_tryon_client = None
 
 def get_hairfast():
     global hairfast_model
@@ -50,6 +55,12 @@ def get_hairfast():
         args.save_all_dir = GENERATED.resolve()
         hairfast_model = HairFast(args)
     return hairfast_model
+
+def get_clothing_tryon():
+    global clothing_tryon_client
+    if clothing_tryon_client is None:
+        clothing_tryon_client = Client("yisol/IDM-VTON")
+    return clothing_tryon_client
 
 @app.get("/")
 def root():
@@ -121,7 +132,24 @@ async def clothing_tryon(person_image: UploadFile = File(...), clothing_image: U
     with open(clothing_path, "wb") as f:
         shutil.copyfileobj(clothing_image.file, f)
 
-    return {"error": "not implemented"}
+    try:
+        output_path = GENERATED / f"{uuid.uuid4()}.png"
+
+        result = get_clothing_tryon().predict(
+            dict={"background": handle_file(str(person_path)), "layers": [], "composite": None},
+            garm_img=handle_file(str(clothing_path)),
+            garment_des="A garment",
+            is_checked=True,
+            is_checked_crop=False,
+            denoise_steps=30,
+            seed=42,
+            api_name="/tryon"
+        )
+
+        shutil.copy(result[0], output_path)
+        return {"result": str(output_path)}
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,5 +1,5 @@
 fastapi
-uvicorn
+uvicorn[standard]
 python-multipart
 Pillow
 torch==1.13.1
@@ -11,3 +11,6 @@ dlib
 face_alignment
 scipy
 scikit-learn
+gradio_client
+kornia
+rembg
