@@ -175,15 +175,15 @@ function HomePage({ onNavigate }) {
                 <img src="/picture3.jpg" alt="Athletic style 1" />
                 <img src="/picture9.jpg" alt="Athletic style 2" />
                 <img src="/picture10.jpg" alt="Athletic style 3" />
-                <img src="/picture3.jpg" alt="Athletic style 1" />
-                <img src="/picture9.jpg" alt="Athletic style 2" />
+                <img src="/picture30.jpg" alt="Athletic style 1" />
+                <img src="/picture31.jpg" alt="Athletic style 2" />
               </div>
               <div className="carousel-right-subcontainer">
                 <img src="/picture11.jpg" alt="Athletic style 4" />
                 <img src="/picture17.jpg" alt="Athletic style 5" />
                 <img src="/picture18.jpg" alt="Athletic style 6" />
-                <img src="/picture11.jpg" alt="Athletic style 4" />
-                <img src="/picture17.jpg" alt="Athletic style 5" />
+                <img src="/picture32.jpg" alt="Athletic style 4" />
+                <img src="/picture33.jpg" alt="Athletic style 5" />
               </div>
             </div>
           </div>
