@@ -205,5 +205,28 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
-models/clothes-virtual-try-on/checkpoints/*.pth
+
+# Model weights and checkpoints - DO NOT COMMIT THESE
 models/HairFastGAN/pretrained_models/
+models/clothes-virtual-try-on/checkpoints/
+models/*/weights/
+models/**/pretrained_models/
+models/**/*.pth
+models/**/*.pt
+models/**/*.ckpt
+models/**/*.safetensors
+models/**/*.bin
+models/**/*.pkl
+models/**/*.onnx
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+
+# Hugging Face cache
+.cache/
+huggingface/
+transformers_cache/
+
+# IDM-VTON official repository (cloned, not tracked)
+models/idm-vton-official/

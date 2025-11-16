@@ -7,13 +7,19 @@ import uuid
 import shutil
 import torch
 import torchvision.transforms.functional as F
-
-sys.path.insert(0, str(Path("../models/HairFastGAN").resolve()))
-from hair_swap import HairFast, get_parser
-from gradio_client import Client, handle_file
+from PIL import Image
 import logging
 
+# Add model paths
+sys.path.insert(0, str(Path("../models/HairFastGAN").resolve()))
+IDM_VTON_PATH = Path("../models/idm-vton-official").resolve()
+sys.path.insert(0, str(IDM_VTON_PATH))
+sys.path.insert(0, str(IDM_VTON_PATH / "gradio_demo"))
+
+from hair_swap import HairFast, get_parser
+
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -33,7 +39,7 @@ UPLOADS.mkdir(parents=True, exist_ok=True)
 GENERATED.mkdir(parents=True, exist_ok=True)
 
 hairfast_model = None
-clothing_tryon_client = None
+idm_vton_model = None
 
 def get_hairfast():
     global hairfast_model
@@ -57,10 +63,11 @@ def get_hairfast():
     return hairfast_model
 
 def get_clothing_tryon():
-    global clothing_tryon_client
-    if clothing_tryon_client is None:
-        clothing_tryon_client = Client("yisol/IDM-VTON")
-    return clothing_tryon_client
+    global idm_vton_model
+    if idm_vton_model is None:
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        idm_vton_model = get_idm_vton_model(device=device)
+    return idm_vton_model
 
 @app.get("/")
 def root():
@@ -123,7 +130,13 @@ async def hairstyle_tryon(
     return {"result": str(output_path)}
 
 @app.post("/api/clothing/try-on")
-async def clothing_tryon(person_image: UploadFile = File(...), clothing_image: UploadFile = File(...)):
+async def clothing_tryon(
+    person_image: UploadFile = File(...),
+    clothing_image: UploadFile = File(...),
+    num_inference_steps: int = Form(30),
+    guidance_scale: float = Form(2.0),
+    seed: int = Form(42)
+):
     person_path = UPLOADS / f"{uuid.uuid4()}{Path(person_image.filename).suffix}"
     clothing_path = UPLOADS / f"{uuid.uuid4()}{Path(clothing_image.filename).suffix}"
 
@@ -135,20 +148,22 @@ async def clothing_tryon(person_image: UploadFile = File(...), clothing_image: U
     try:
         output_path = GENERATED / f"{uuid.uuid4()}.png"
 
-        result = get_clothing_tryon().predict(
-            dict={"background": handle_file(str(person_path)), "layers": [], "composite": None},
-            garm_img=handle_file(str(clothing_path)),
-            garment_des="A garment",
-            is_checked=True,
-            is_checked_crop=False,
-            denoise_steps=30,
-            seed=42,
-            api_name="/tryon"
+        # Use local IDM-VTON model
+        model = get_clothing_tryon()
+        result_image = model.try_on(
+            person_image=str(person_path),
+            garment_image=str(clothing_path),
+            num_inference_steps=num_inference_steps,
+            guidance_scale=guidance_scale,
+            seed=seed
         )
 
-        shutil.copy(result[0], output_path)
+        # Save result
+        result_image.save(output_path)
+
         return {"result": str(output_path)}
     except Exception as e:
+        logging.error(f"Error in clothing try-on: {e}")
         return {"error": str(e)}, 500
 
 if __name__ == "__main__":
