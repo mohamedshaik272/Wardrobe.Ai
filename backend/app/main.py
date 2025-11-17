@@ -1,221 +1,64 @@
-"""Wardrobe.AI Backend - Virtual try-on for hairstyles and clothing"""
-from fastapi import FastAPI, UploadFile, File, Form
+"""Wardrobe.AI Backend - Virtual try-on for hairstyles and clothing using Hugging Face APIs"""
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 from pathlib import Path
-import sys
 import uuid
 import shutil
-import torch
-import torchvision.transforms.functional as F
-from PIL import Image
-import numpy as np
-from typing import Union
 import logging
+import os
+from typing import Optional, List, Dict, Any
+from PIL import Image
+from dotenv import load_dotenv
 
-sys.path.insert(0, str(Path("../models/HairFastGAN").resolve()))
-IDM_VTON_PATH = Path("../models/idm-vton-official").resolve()
-sys.path.insert(0, str(IDM_VTON_PATH))
-sys.path.insert(0, str(IDM_VTON_PATH / "gradio_demo"))
+# Load environment variables from root .env file
+project_root = Path(__file__).resolve().parent.parent.parent
+env_path = project_root / '.env'
+load_dotenv(dotenv_path=env_path, override=True)
 
-from hair_swap import HairFast, get_parser
+from app.services.idm_vton_service import get_idm_vton_service, initialize_idm_vton_service
+from app.services.google_search_service import get_google_search_service
+from app.services.openai_service import get_openai_service
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class IDMVTONModel:
-    """IDM-VTON virtual try-on model wrapper"""
+def save_and_convert_to_png(upload_file: UploadFile, save_dir: Path) -> Path:
+    """Saves an uploaded file and converts it to PNG, returning the new path."""
+    # Create a unique filename to avoid conflicts
+    temp_path = save_dir / f"{uuid.uuid4()}{Path(upload_file.filename).suffix}"
+    with open(temp_path, "wb") as f:
+        shutil.copyfileobj(upload_file.file, f)
 
-    def __init__(self, device: str = "cuda"):
-        self.device = device
-        self.pipe = None
-        self.parsing_model = None
-        self.openpose_model = None
-        self._load_model()
+    # If it's already a PNG, just return the path
+    if temp_path.suffix.lower() == ".png":
+        return temp_path
 
-    def _load_model(self):
-        try:
-            logger.info("Loading IDM-VTON model from HuggingFace...")
-
-            from src.tryon_pipeline import StableDiffusionXLInpaintPipeline as TryonPipeline
-            from src.unet_hacked_garmnet import UNet2DConditionModel as UNet2DConditionModel_ref
-            from src.unet_hacked_tryon import UNet2DConditionModel
-            from transformers import (
-                CLIPImageProcessor,
-                CLIPVisionModelWithProjection,
-                CLIPTextModel,
-                CLIPTextModelWithProjection,
-                AutoTokenizer,
-            )
-            from diffusers import DDPMScheduler, AutoencoderKL
-            from preprocess.humanparsing.run_parsing import Parsing
-            from preprocess.openpose.run_openpose import OpenPose
-
-            base_path = "yisol/IDM-VTON"
-            dtype = torch.float16 if self.device == "cuda" else torch.float32
-
-            unet = UNet2DConditionModel.from_pretrained(
-                base_path, subfolder="unet", torch_dtype=dtype
-            )
-            unet.requires_grad_(False)
-
-            UNet_Encoder = UNet2DConditionModel_ref.from_pretrained(
-                base_path, subfolder="unet_encoder", torch_dtype=dtype
-            )
-            UNet_Encoder.requires_grad_(False)
-
-            tokenizer_one = AutoTokenizer.from_pretrained(
-                base_path, subfolder="tokenizer", use_fast=False
-            )
-            tokenizer_two = AutoTokenizer.from_pretrained(
-                base_path, subfolder="tokenizer_2", use_fast=False
-            )
-
-            noise_scheduler = DDPMScheduler.from_pretrained(base_path, subfolder="scheduler")
-
-            text_encoder_one = CLIPTextModel.from_pretrained(
-                base_path, subfolder="text_encoder", torch_dtype=dtype
-            )
-            text_encoder_one.requires_grad_(False)
-
-            text_encoder_two = CLIPTextModelWithProjection.from_pretrained(
-                base_path, subfolder="text_encoder_2", torch_dtype=dtype
-            )
-            text_encoder_two.requires_grad_(False)
-
-            image_encoder = CLIPVisionModelWithProjection.from_pretrained(
-                base_path, subfolder="image_encoder", torch_dtype=dtype
-            )
-            image_encoder.requires_grad_(False)
-
-            vae = AutoencoderKL.from_pretrained(
-                base_path, subfolder="vae", torch_dtype=dtype
-            )
-            vae.requires_grad_(False)
-
-            gpu_id = 0 if self.device == "cuda" else -1
-            self.parsing_model = Parsing(gpu_id)
-            self.openpose_model = OpenPose(gpu_id)
-
-            self.pipe = TryonPipeline.from_pretrained(
-                base_path,
-                unet=unet,
-                vae=vae,
-                feature_extractor=CLIPImageProcessor(),
-                text_encoder=text_encoder_one,
-                text_encoder_2=text_encoder_two,
-                tokenizer=tokenizer_one,
-                tokenizer_2=tokenizer_two,
-                scheduler=noise_scheduler,
-                image_encoder=image_encoder,
-                torch_dtype=dtype,
-            )
-            self.pipe.unet_encoder = UNet_Encoder
-
-            logger.info("IDM-VTON model loaded successfully")
-
-        except Exception as e:
-            logger.error(f"Error loading IDM-VTON model: {e}")
-            raise
-
-    def try_on(
-        self,
-        person_image: Union[str, Path, Image.Image],
-        garment_image: Union[str, Path, Image.Image],
-        num_inference_steps: int = 30,
-        guidance_scale: float = 2.0,
-        seed: int = 42,
-        auto_mask: bool = True,
-        auto_crop: bool = False,
-    ) -> Image.Image:
-        if self.pipe is None:
-            raise RuntimeError("Model not loaded")
-
-        try:
-            from torchvision import transforms
-            from utils_mask import get_mask_location
-            import apply_net
-
-            if isinstance(person_image, (str, Path)):
-                person_img = Image.open(person_image).convert("RGB")
-            else:
-                person_img = person_image.convert("RGB")
-
-            if isinstance(garment_image, (str, Path)):
-                garm_img = Image.open(garment_image).convert("RGB")
-            else:
-                garm_img = garment_image.convert("RGB")
-
-            garm_img = garm_img.resize((768, 1024))
-
-            if auto_crop:
-                width, height = person_img.size
-                target_width = int(min(width, height * (3 / 4)))
-                target_height = int(min(height, width * (4 / 3)))
-                left = (width - target_width) / 2
-                top = (height - target_height) / 2
-                right = (width + target_width) / 2
-                bottom = (height + target_height) / 2
-                person_img = person_img.crop((left, top, right, bottom))
-
-            person_img = person_img.resize((768, 1024))
-
-            if self.device == "cuda":
-                self.openpose_model.preprocessor.body_estimation.model.to(self.device)
-                self.pipe.to(self.device)
-                self.pipe.unet_encoder.to(self.device)
-
-            if auto_mask:
-                keypoints = self.openpose_model(person_img.resize((384, 512)))
-                model_parse, _ = self.parsing_model(person_img.resize((384, 512)))
-                mask, mask_gray = get_mask_location('hd', "upper_body", model_parse, keypoints)
-                mask = mask.resize((768, 1024))
-            else:
-                mask = Image.new("L", (768, 1024), 255)
-
-            from detectron2.data.detection_utils import convert_PIL_to_numpy
-
-            keypoints = self.openpose_model(person_img.resize((384, 512)))
-            model_parse, _ = self.parsing_model(person_img.resize((384, 512)))
-            mask, mask_gray = get_mask_location('hd', "upper_body", model_parse, keypoints)
-            mask = mask.resize((768, 1024))
-
-            densepose = apply_net.apply_net_image(person_img, IDM_VTON_PATH / "gradio_demo")
-
-            generator = torch.Generator(self.device).manual_seed(seed)
-
-            logger.info("Running IDM-VTON inference...")
-            images = self.pipe(
-                prompt="model is wearing",
-                image=person_img,
-                mask_image=mask,
-                pose_image=densepose,
-                garment_image=garm_img,
-                num_inference_steps=num_inference_steps,
-                guidance_scale=guidance_scale,
-                generator=generator,
-            )[0]
-
-            logger.info("Inference completed")
-            return images[0]
-
-        except Exception as e:
-            logger.error(f"Error during try-on: {e}")
-            raise
+    # Convert to PNG
+    png_path = temp_path.with_suffix(".png")
+    try:
+        with Image.open(temp_path) as img:
+            # Using .convert("RGB") to handle formats like WEBP that might have an alpha channel
+            # and to ensure compatibility with models that expect 3-channel images.
+            rgb_img = img.convert("RGB")
+            rgb_img.save(png_path, "PNG")
+        
+        temp_path.unlink()  # Remove the original non-PNG file
+        logger.info(f"Successfully converted {temp_path.name} to {png_path.name}")
+        return png_path
+    except Exception:
+        logger.error(f"Failed to convert {temp_path.name} to PNG.", exc_info=True)
+        # If conversion fails, re-raise as an HTTPException
+        raise HTTPException(status_code=400, detail=f"Invalid or unsupported image file: {upload_file.filename}")
 
 
-_idm_vton_instance = None
-
-
-def get_idm_vton_model(device: str = "cuda") -> IDMVTONModel:
-    global _idm_vton_instance
-    if _idm_vton_instance is None:
-        _idm_vton_instance = IDMVTONModel(device=device)
-    return _idm_vton_instance
-
-
-app = FastAPI()
+app = FastAPI(
+    title="Wardrobe.AI API",
+    description="Virtual try-on for clothing",
+    version="2.0.0"
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -225,137 +68,206 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/files", StaticFiles(directory="../datasets"), name="files")
-
+# Setup directories
 UPLOADS = Path("../datasets/uploads")
 GENERATED = Path("../datasets/generated")
+
 UPLOADS.mkdir(parents=True, exist_ok=True)
 GENERATED.mkdir(parents=True, exist_ok=True)
 
-hairfast_model = None
-
-
-def get_hairfast():
-    global hairfast_model
-    if hairfast_model is None:
-        parser = get_parser()
-        args = parser.parse_args([])
-        args.device = "cuda"
-        args.size = 1024
-        args.ckpt = str(Path("../models/HairFastGAN/pretrained_models/StyleGAN/ffhq.pt").resolve())
-        args.channel_multiplier = 2
-        args.latent = 512
-        args.n_mlp = 8
-        args.batch_size = 3
-        args.mixing = 0.95
-        args.smooth = 5
-        args.rotate_checkpoint = str(Path("../models/HairFastGAN/pretrained_models/Rotate/rotate_best.pth").resolve())
-        args.blending_checkpoint = str(Path("../models/HairFastGAN/pretrained_models/Blending/checkpoint.pth").resolve())
-        args.pp_checkpoint = str(Path("../models/HairFastGAN/pretrained_models/PostProcess/pp_model.pth").resolve())
-        args.save_all_dir = GENERATED.resolve()
-        hairfast_model = HairFast(args)
-    return hairfast_model
+# Mount static files
+app.mount("/files", StaticFiles(directory="../datasets"), name="files")
 
 
 @app.get("/")
 def root():
-    return {"status": "ok"}
+    """Health check endpoint"""
+    return {
+        "status": "ok",
+        "message": "Wardrobe.AI API is running",
+        "version": "2.0.0"
+    }
 
 
-@app.get("/api/hairstyles/shapes")
-def get_shapes():
-    shapes = []
-    for folder in Path("../datasets").iterdir():
-        if folder.is_dir() and folder.name not in ["colors", "uploads", "generated"]:
-            files = list(folder.glob("*.png")) + list(folder.glob("*.jpg"))
-            if files:
-                shapes.append({"id": folder.name, "name": folder.name, "thumbnail": str(files[0])})
-    return shapes
+@app.get("/api/health")
+def health():
+    """Detailed health check"""
+    import os
 
+    services_status = {
+        "idm_vton": "ready",
+        "google_search": "ready" if os.getenv("GOOGLE_API_KEY") else "not configured",
+        "openai": "ready" if os.getenv("OPENAI_API_KEY") else "not configured"
+    }
 
-@app.get("/api/hairstyles/colors")
-def get_colors():
-    colors = []
-    colors_dir = Path("../datasets/colors")
-    if colors_dir.exists():
-        for file in list(colors_dir.glob("*.png")) + list(colors_dir.glob("*.jpg")):
-            if not any(c["id"] == file.stem for c in colors):
-                colors.append({"id": file.stem, "name": file.stem, "thumbnail": str(file)})
-    return colors
-
-
-@app.post("/api/hairstyles/try-on")
-async def hairstyle_tryon(
-    face_image: UploadFile = File(...),
-    shape_id: str = Form(...),
-    color_id: str = Form(...),
-    align: bool = Form(True)
-):
-    face_path = UPLOADS / f"{uuid.uuid4()}{Path(face_image.filename).suffix}"
-    with open(face_path, "wb") as f:
-        shutil.copyfileobj(face_image.file, f)
-
-    shape_files = list((Path("../datasets") / shape_id).glob("*.png")) + list((Path("../datasets") / shape_id).glob("*.jpg"))
-    shape_path = shape_files[0]
-
-    color_path = Path("../datasets/colors") / f"{color_id}.png"
-    if not color_path.exists():
-        color_path = Path("../datasets/colors") / f"{color_id}.jpg"
-
-    result = get_hairfast().swap(
-        face_img=str(face_path),
-        shape_img=str(shape_path),
-        color_img=str(color_path),
-        align=align,
-        benchmark=False
-    )
-
-    final_image = result[0] if isinstance(result, tuple) else result
-    output_path = GENERATED / f"{uuid.uuid4()}.png"
-
-    if torch.is_tensor(final_image):
-        F.to_pil_image(final_image.cpu()).save(output_path)
-    else:
-        final_image.save(output_path)
-
-    return {"result": str(output_path)}
+    return {
+        "status": "healthy",
+        "services": services_status
+    }
 
 
 @app.post("/api/clothing/try-on")
 async def clothing_tryon(
-    person_image: UploadFile = File(...),
-    clothing_image: UploadFile = File(...),
-    num_inference_steps: int = Form(30),
-    guidance_scale: float = Form(2.0),
-    seed: int = Form(42)
+    person_image: UploadFile = File(..., description="Image of the person"),
+    clothing_image: UploadFile = File(..., description="Image of the clothing item"),
+    garment_description: str = Form(default="A clothing item", description="Description of the garment"),
+    auto_mask: bool = Form(default=True, description="Use automatic masking"),
+    auto_crop: bool = Form(default=False, description="Automatically crop the image"),
+    denoise_steps: int = Form(default=30, description="Number of denoising steps"),
+    seed: int = Form(default=42, description="Random seed for reproducibility")
 ):
-    person_path = UPLOADS / f"{uuid.uuid4()}{Path(person_image.filename).suffix}"
-    clothing_path = UPLOADS / f"{uuid.uuid4()}{Path(clothing_image.filename).suffix}"
+    """
+    Virtual try-on for clothing using IDM-VTON
 
-    with open(person_path, "wb") as f:
-        shutil.copyfileobj(person_image.file, f)
-    with open(clothing_path, "wb") as f:
-        shutil.copyfileobj(clothing_image.file, f)
-
+    Upload a person image and a clothing image to see how the clothing looks on the person.
+    """
     try:
-        output_path = GENERATED / f"{uuid.uuid4()}.png"
+        # Save and convert uploaded files to PNG
+        person_path = save_and_convert_to_png(person_image, UPLOADS)
+        clothing_path = save_and_convert_to_png(clothing_image, UPLOADS)
 
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        model = get_idm_vton_model(device=device)
-        result_image = model.try_on(
-            person_image=str(person_path),
-            garment_image=str(clothing_path),
-            num_inference_steps=num_inference_steps,
-            guidance_scale=guidance_scale,
+        logger.info(f"Processing clothing try-on request")
+
+        # Call IDM-VTON service
+        service = get_idm_vton_service()
+        result_path = service.try_on(
+            person_image=person_path,
+            garment_image=clothing_path,
+            garment_description=garment_description,
+            is_checked=auto_mask,
+            is_checked_crop=auto_crop,
+            denoise_steps=denoise_steps,
             seed=seed
         )
 
-        result_image.save(output_path)
+        # Copy result to generated folder with a unique name
+        output_filename = f"{uuid.uuid4()}.png"
+        output_path = GENERATED / output_filename
+        shutil.copy(result_path, output_path)
 
-        return {"result": str(output_path)}
+        logger.info(f"Clothing try-on completed: {output_path}")
+
+        return {
+            "success": True,
+            "result": f"/files/generated/{output_filename}",
+            "message": "Virtual try-on completed successfully"
+        }
+
     except Exception as e:
-        logger.error(f"Error in clothing try-on: {e}")
-        return {"error": str(e)}, 500
+        logger.error(f"Error in clothing try-on: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/search")
+async def search_products(query: str, num_results: int = 10):
+    """
+    Search for clothing/products using Google Custom Search API
+
+    Args:
+        query: Search query string
+        num_results: Number of results to return (default: 10)
+
+    Returns:
+        JSON with search results
+    """
+    try:
+        service = get_google_search_service()
+        results = service.search_products(query, num_results=num_results)
+
+        logger.info(f"Search completed for query: '{query}' - Found {len(results)} results")
+
+        return {"results": results}
+
+    except Exception as e:
+        logger.error(f"Error in product search: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/ai/chat")
+async def ai_chat(
+    messages: List[Dict[str, str]] = Body(...),
+    context: Optional[Dict[str, Any]] = Body(default=None)
+):
+    """
+    Get AI stylist chat response
+
+    Args:
+        messages: List of chat messages with 'type' and 'text' fields
+        context: Optional context with closet info and preferences
+
+    Returns:
+        JSON with AI response
+    """
+    try:
+        service = get_openai_service()
+        response = await service.get_chat_response(messages, context)
+
+        return {"response": response}
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error in AI chat: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/ai/analyze-image")
+async def analyze_image(
+    image_url: str = Body(...),
+    prompt: Optional[str] = Body(default=None)
+):
+    """
+    Analyze fashion image using AI
+
+    Args:
+        image_url: URL of the image to analyze
+        prompt: Optional custom analysis prompt
+
+    Returns:
+        JSON with AI analysis
+    """
+    try:
+        service = get_openai_service()
+        analysis = await service.analyze_image(image_url, prompt)
+
+        return {"analysis": analysis}
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error in image analysis: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/ai/recommendations")
+async def generate_recommendations(preferences: Dict[str, Any] = Body(...)):
+    """
+    Generate clothing recommendations based on preferences using real Google Shopping results
+
+    Args:
+        preferences: User preferences (purpose, brands, price, size, etc.)
+
+    Returns:
+        JSON with recommended items from real stores
+    """
+    try:
+        openai_service = get_openai_service()
+        google_service = get_google_search_service()
+
+        # Pass Google Search service to get real products
+        recommendations = await openai_service.generate_clothing_recommendations(
+            preferences,
+            google_search_service=google_service
+        )
+
+        logger.info(f"Generated {len(recommendations)} real product recommendations")
+        return {"recommendations": recommendations}
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error generating recommendations: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":

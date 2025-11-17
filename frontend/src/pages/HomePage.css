@@ -1,5 +1,6 @@
 /* ==================== BIRCHMORE-INSPIRED HOME PAGE ==================== */
 :root {
+  /* Color Palette */
   --blue-bell: #1e91d6;
   --twitter-blue: #0072bb;
   --yellow-green: #8fc93a;
@@ -7,6 +8,22 @@
   --golden-chestnut: #e18335;
   --dark-navy: #0a2540;
   --light-gray: #f5f7fa;
+
+  /* Border Radius System */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Shadow System */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.4s ease;
 }
 
 * {
@@ -487,7 +504,6 @@
 }
 
 
-/* Carousel Container */
 .carousel-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -499,13 +515,14 @@
 
 .carousel-left-subcontainer,
 .carousel-right-subcontainer {
-  height: auto;
-  width: 100%;
-  animation: slide 60s linear infinite;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  animation: scroll 80s linear infinite;
+}
+
+.carousel-right-subcontainer {
+  animation-direction: reverse;
 }
 
 .carousel-left-subcontainer img,
@@ -517,16 +534,12 @@
   background: #fafafa;
 }
 
-.carousel-right-subcontainer {
-  transform: translateY(-50%);
-}
-
-@keyframes slide {
-  0% {
-    transform: translate3d(0, 0, 0);
+@keyframes scroll {
+  from {
+    transform: translateY(0);
   }
-  100% {
-    transform: translate3d(0, -50%, 0);
+  to {
+    transform: translateY(-50%);
   }
 }
 

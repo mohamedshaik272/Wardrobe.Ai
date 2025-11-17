@@ -2,21 +2,9 @@ fastapi
 uvicorn[standard]
 python-multipart
 Pillow
-torch>=2.0.1
-torchvision>=0.15.2
-numpy==1.23.5
+numpy
+gradio_client
+python-dotenv
 opencv-python
-scikit-image
-dlib
-face_alignment
-scipy
-scikit-learn
-kornia
-rembg
-
-# IDM-VTON dependencies
-diffusers==0.27.2
-transformers==4.40.2
-accelerate==0.30.0
-einops==0.8.0
-onnxruntime-gpu
+google-api-python-client
+httpx

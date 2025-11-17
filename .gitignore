@@ -135,6 +135,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
+# Single centralized .env file at project root (backend and frontend both use this)
 .env
 .envrc
 .venv
@@ -208,7 +209,6 @@ __marimo__/
 
 # Model weights and checkpoints - DO NOT COMMIT THESE
 models/HairFastGAN/pretrained_models/
-models/clothes-virtual-try-on/checkpoints/
 models/*/weights/
 models/**/pretrained_models/
 models/**/*.pth
@@ -230,3 +230,13 @@ transformers_cache/
 
 # IDM-VTON official repository (cloned, not tracked)
 models/idm-vton-official/
+
+# Datasets - user uploads and generated images
+datasets/uploads/
+datasets/generated/
+
+# Node modules
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/

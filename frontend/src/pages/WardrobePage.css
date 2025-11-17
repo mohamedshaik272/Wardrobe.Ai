@@ -1,10 +1,26 @@
 /* ==================== WARDROBE PAGE STYLES ==================== */
 :root {
-  /* Using variables from HomePage for color consistency */
+  /* Color Palette */
   --blue-bell: #1e91d6;
   --twitter-blue: #0072bb;
   --dark-navy: #0a2540;
   --light-gray: #f5f7fa;
+
+  /* Border Radius System */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Shadow System */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.4s ease;
 }
 
 /* Base Styles */

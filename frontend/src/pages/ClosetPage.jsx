@@ -1,26 +1,25 @@
 import { useState, useEffect } from "react";
 import "./ClosetPage.css";
-import { X } from "lucide-react"; // ADDED: Import Lucide X icon
+import { backendApi } from "../services/backendApi";
+import { openaiService } from "../services/openaiService";
 
 function ClosetPage({ onNavigate, closetData }) {
   const [scrolled, setScrolled] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [closetCount] = useState(3); // Mock closet count
-  
-  // Chat state
+
   const [messages, setMessages] = useState([
     {
       id: 1,
       type: "ai",
-      text: `Hi! I'm your AI stylist for "${closetData?.name}". Tell me what you're looking for!`,
+      text: "Hi! I am your personal AI Stylist. Ask me to help you create a new wardrobe, find a specific item, or give you fashion advice!",
     },
   ]);
   const [inputMessage, setInputMessage] = useState("");
-  
-  // Upload state
-  const [uploadedImages, setUploadedImages] = useState([]);
-  
-  // Preferences state
+  const [isChatLoading, setIsChatLoading] = useState(false);
+
+  // State for user's closet items
+  const [closetItems, setClosetItems] = useState([]);
+
   const [preferences, setPreferences] = useState({
     minPrice: "",
     maxPrice: "",
@@ -29,12 +28,18 @@ function ClosetPage({ onNavigate, closetData }) {
     size: "",
     itemCount: 5,
   });
-  
-  // Generated items state
+
   const [generatedItems, setGeneratedItems] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Handle scroll for navbar
+  const [tryOnMode, setTryOnMode] = useState("clothing");
+  const [tryOnImages, setTryOnImages] = useState({
+    person: null,
+    clothing: null,
+  });
+  const [tryOnResult, setTryOnResult] = useState(null);
+  const [isTryOnLoading, setIsTryOnLoading] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
@@ -43,34 +48,38 @@ function ClosetPage({ onNavigate, closetData }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Mock clothing items for closet container
-  const clothingItems = Array.from(
-    { length: parseInt(closetData?.itemCount) || 12 },
-    (_, i) => ({
-      id: i + 1,
-      name: `Clothing Item ${i + 1}`,
-      category: ["Tops", "Bottoms", "Outerwear", "Shoes"][i % 4],
-      color: ["Black", "White", "Blue", "Gray", "Red"][i % 5],
-      size: ["XS", "S", "M", "L", "XL"][i % 5],
-      description: "A versatile piece that fits perfectly into any wardrobe. Made with premium materials for comfort and style.",
-      image: `https://via.placeholder.com/400x500/667eea/ffffff?text=Item+${i + 1}`,
-    })
-  );
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [closetData]);
 
-  // Handle item selection
+  // Handle adding items to closet
+  const handleAddItemToCloset = (e) => {
+    const files = Array.from(e.target.files);
+    const newItems = files.map((file) => ({
+      id: Date.now() + Math.random(),
+      name: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
+      image: URL.createObjectURL(file),
+      file: file,
+      category: "Clothing",
+    }));
+    setClosetItems([...closetItems, ...newItems]);
+  };
+
+  const handleRemoveItemFromCloset = (id) => {
+    setClosetItems(closetItems.filter((item) => item.id !== id));
+  };
+
   const handleItemClick = (item) => {
     setSelectedItem(item);
   };
 
-  // Close detail panel
   const handleCloseDetail = () => {
     setSelectedItem(null);
   };
 
-  // Chat handlers
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (inputMessage.trim()) {
+    if (inputMessage.trim() && !isChatLoading) {
       const userMessage = {
         id: Date.now(),
         type: "user",
@@ -78,78 +87,95 @@ function ClosetPage({ onNavigate, closetData }) {
       };
 
       setMessages([...messages, userMessage]);
+      setInputMessage("");
+      setIsChatLoading(true);
 
-      setTimeout(() => {
-        const aiResponse = {
+      try {
+        const context = {
+          closetName: closetData?.name,
+          closetType: closetData?.type,
+          preferences: preferences,
+        };
+
+        const aiResponse = await openaiService.getChatResponse(
+          [...messages, userMessage],
+          context
+        );
+
+        const aiMessage = {
           id: Date.now() + 1,
           type: "ai",
-          text: generateAIResponse(inputMessage),
+          text: aiResponse,
         };
-        setMessages((prev) => [...prev, aiResponse]);
-      }, 1000);
 
-      setInputMessage("");
+        setMessages((prev) => [...prev, aiMessage]);
+      } catch (error) {
+        const errorMessage = {
+          id: Date.now() + 1,
+          type: "ai",
+          text: "Sorry, I encountered an error. Please try again.",
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+        console.error("Chat error:", error);
+      } finally {
+        setIsChatLoading(false);
+      }
     }
   };
 
-  const generateAIResponse = (userInput) => {
-    const responses = [
-      "Great choice! I can help you find that. What's your budget range?",
-      "I understand your style preference. Would you like to see options from specific brands?",
-      "Perfect! Let me know your size and I'll generate some recommendations.",
-      "That sounds wonderful! Are you looking for casual, athletic, or formal wear?",
-      "Excellent taste! I'll find the best options for you. Any color preferences?",
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
 
-  // Image upload handlers
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    const newImages = files.map((file) => ({
-      id: Date.now() + Math.random(),
-      url: URL.createObjectURL(file),
-      name: file.name,
-    }));
-    setUploadedImages([...uploadedImages, ...newImages]);
-
-    const aiMessage = {
-      id: Date.now(),
-      type: "ai",
-      text: `I see you've uploaded ${files.length} image(s)! I'll analyze the style and find similar options for you.`,
-    };
-    setMessages([...messages, aiMessage]);
-  };
-
-  const handleRemoveImage = (id) => {
-    setUploadedImages(uploadedImages.filter((img) => img.id !== id));
-  };
-
-  // Generate recommendations
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setIsGenerating(true);
-
-    setTimeout(() => {
-      const mockItems = Array.from(
-        { length: preferences.itemCount },
-        (_, i) => ({
-          id: Date.now() + i,
-          name: `Stylish ${preferences.purpose} wear ${i + 1}`,
-          image: `https://via.placeholder.com/300x400/0072bb/ffffff?text=Item+${i + 1}`,
-          price: `$${(Math.random() * 50 + 20).toFixed(2)}`,
-          brand: preferences.brands || "Various Brands",
-          description: `Perfect for ${preferences.purpose} occasions`,
-        })
-      );
-
-      setGeneratedItems(mockItems);
+    try {
+      const recommendations = await openaiService.generateClothingRecommendations(preferences);
+      setGeneratedItems(recommendations);
+    } catch (error) {
+      console.error("Failed to generate items:", error);
+      // Optionally, show an error message to the user
+    } finally {
       setIsGenerating(false);
-    }, 2000);
+    }
   };
 
+  const handleTryOnImageUpload = (type, e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setTryOnImages({
+        ...tryOnImages,
+        [type]: {
+          url: URL.createObjectURL(file),
+          file: file,
+        },
+      });
+    }
+  };
+
+  const handleVirtualTryOn = async () => {
+    if (tryOnMode === "clothing") {
+      if (!tryOnImages.person || !tryOnImages.clothing) {
+        alert("Please upload both person and clothing images");
+        return;
+      }
+
+      setIsTryOnLoading(true);
+      try {
+        const result = await backendApi.clothingTryOn(
+          tryOnImages.person.file,
+          tryOnImages.clothing.file
+        );
+
+        const imageUrl = backendApi.getResultImageUrl(result.result);
+        setTryOnResult(imageUrl);
+      } catch (error) {
+        console.error("Try-on error:", error);
+        alert(error.message || "Virtual try-on failed. Please try again.");
+      } finally {
+        setIsTryOnLoading(false);
+      }
+    }
+  };
   return (
     <div className="closet-page">
-      {/* Navigation Bar - EXACT MATCH to WardrobePage */}
       <nav className={`navbar always-white ${scrolled ? "scrolled" : ""}`}>
         <div className="nav-content">
           <div className="logo" onClick={() => onNavigate("home")}>
@@ -166,125 +192,53 @@ function ClosetPage({ onNavigate, closetData }) {
         </div>
       </nav>
 
-      {/* Main Content Area */}
       <div className="closet-main-wrapper">
-        {/* Hero Header Section */}
         <section className="closet-hero-section">
           <div className="closet-hero-content">
             <h1 className="closet-page-title">{closetData?.name || "My Closet"}</h1>
             <div className="closet-meta-info">
               <span className="meta-badge">{closetData?.type || "Casual"}</span>
-              <span className="meta-count">{closetData?.itemCount || clothingItems.length} items</span>
+              <span className="meta-count">{closetItems.length} items</span>
             </div>
           </div>
         </section>
 
-        {/* Two Panel Layout - Left and Right */}
-        <section className="two-panel-section">
-          <div className="two-panel-container">
-            {/* Left Panel - Chat & Upload */}
-            <div className="left-panel">
-              {/* Chat Section */}
-              <div className="chat-section">
-                <h2>AI Stylist Chat</h2>
-                <div className="chat-messages">
-                  {messages.map((message) => (
-                    <div key={message.id} className={`message ${message.type}`}>
-                      <div className="message-content">
-                        {message.type === "ai" && (
-                          <span className="ai-icon">🤖</span>
-                        )}
-                        <p>{message.text}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <form onSubmit={handleSendMessage} className="chat-input-form">
-                  <input
-                    type="text"
-                    placeholder="Describe what you're looking for..."
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    className="chat-input"
-                  />
-                  <button type="submit" className="send-btn">
-                    Send
-                  </button>
-                </form>
-              </div>
-
-              {/* Image Upload Section */}
-              <div className="upload-section">
-                <h3>Upload Inspiration</h3>
-                <div className="upload-area">
-                  <input
-                    type="file"
-                    id="image-upload"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageUpload}
-                    style={{ display: "none" }}
-                  />
-                  <label htmlFor="image-upload" className="upload-label">
-                    <div className="upload-icon">📸</div>
-                    <p>Click to upload images</p>
-                  </label>
-                </div>
-
-                {uploadedImages.length > 0 && (
-                  <div className="uploaded-images">
-                    {uploadedImages.map((image) => (
-                      <div key={image.id} className="uploaded-image">
-                        <img src={image.url} alt={image.name} />
-                        <button
-                          className="remove-image-btn"
-                          onClick={() => handleRemoveImage(image.id)}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right Panel - Preferences & Generated Items */}
-            <div className="right-panel">
-              {/* Preferences Section */}
-              <div className="preferences-section">
-                <h2>Preferences</h2>
-
+        {/* Full-Width Preferences Section */}
+        <section className="preferences-section-full">
+          <div className="preferences-container">
+            <h2 className="section-title">Generate Recommendations</h2>
+            <div className="preferences-form">
+              <div className="preference-row">
                 <div className="preference-group">
                   <label>Price Range</label>
                   <div className="price-inputs">
                     <input
                       type="number"
-                      placeholder="Min ($)"
+                      placeholder="Min"
                       value={preferences.minPrice}
                       onChange={(e) =>
                         setPreferences({ ...preferences, minPrice: e.target.value })
                       }
-                      className="price-input"
+                      className="text-input price-input"
                     />
-                    <span>-</span>
+                    <span className="price-separator">-</span>
                     <input
                       type="number"
-                      placeholder="Max ($)"
+                      placeholder="Max"
                       value={preferences.maxPrice}
                       onChange={(e) =>
                         setPreferences({ ...preferences, maxPrice: e.target.value })
                       }
-                      className="price-input"
+                      className="text-input price-input"
                     />
                   </div>
                 </div>
 
                 <div className="preference-group">
-                  <label>Brands (optional)</label>
+                  <label>Brands</label>
                   <input
                     type="text"
-                    placeholder="e.g., Nike, Adidas, Zara"
+                    placeholder="e.g., Nike, Adidas"
                     value={preferences.brands}
                     onChange={(e) =>
                       setPreferences({ ...preferences, brands: e.target.value })
@@ -323,96 +277,236 @@ function ClosetPage({ onNavigate, closetData }) {
                   />
                 </div>
 
-                <div className="preference-group">
-                  <label>Number of Items to Generate</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="20"
-                    value={preferences.itemCount}
-                    onChange={(e) =>
-                      setPreferences({
-                        ...preferences,
-                        itemCount: parseInt(e.target.value),
-                      })
-                    }
-                    className="number-input"
-                  />
+                <div className="preference-group-button">
+                  <button
+                    className="generate-btn-large"
+                    onClick={handleGenerate}
+                    disabled={isGenerating}
+                  >
+                    {isGenerating ? "Generating..." : "✨ Generate"}
+                  </button>
                 </div>
-
-                <button
-                  className="generate-btn"
-                  onClick={handleGenerate}
-                  disabled={isGenerating}
-                >
-                  {isGenerating ? "Generating..." : "✨ Generate Recommendations"}
-                </button>
               </div>
-
-              {/* Generated Items Section */}
-              {generatedItems.length > 0 && (
-                <div className="generated-section">
-                  <h2>Your Recommendations</h2>
-                  <div className="items-grid">
-                    {generatedItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className="generated-item-card"
-                        onClick={() => setSelectedItem(item)}
-                      >
-                        <img src={item.image} alt={item.name} />
-                        <div className="generated-item-info">
-                          <h4>{item.name}</h4>
-                          <p className="item-price">{item.price}</p>
-                          <p className="item-brand">{item.brand}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </section>
 
-        {/* Closet Container - Bottom Section */}
+        {/* Recommendations Section */}
+        {generatedItems.length > 0 && (
+          <section className="recommendations-section-full">
+            <div className="recommendations-container">
+              <h2 className="section-title">Your Recommendations</h2>
+              <div className="recommendations-grid">
+                {generatedItems.map((item) => (
+                  <a
+                    key={item.id}
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="recommendation-card"
+                  >
+                    <div className="recommendation-image">
+                      <img src={item.image} alt={item.name} />
+                    </div>
+                    <div className="recommendation-info">
+                      <h4>{item.name}</h4>
+                      <p className="recommendation-price">{item.price}</p>
+                      <p className="recommendation-brand">{item.brand}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section className="two-panel-section">
+          <div className="two-panel-container">
+            <div className="left-panel">
+              <div className="chat-section">
+                <h2>AI Stylist Chat</h2>
+                <div className="chat-messages">
+                  {messages.map((message) => (
+                    <div key={message.id} className={`message ${message.type}`}>
+                      <div className="message-content">
+                        {message.type === "ai" && (
+                          <span className="ai-icon">🤖</span>
+                        )}
+                        <p>{message.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {isChatLoading && (
+                    <div className="message ai">
+                      <div className="message-content">
+                        <span className="ai-icon">🤖</span>
+                        <p>Thinking...</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <form onSubmit={handleSendMessage} className="chat-input-form">
+                  <input
+                    type="text"
+                    placeholder="Describe what you're looking for..."
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    className="chat-input"
+                    disabled={isChatLoading}
+                  />
+                  <button type="submit" className="send-btn" disabled={isChatLoading}>
+                    Send
+                  </button>
+                </form>
+              </div>
+
+            </div>
+
+            <div className="right-panel">
+              <div className="virtual-tryon-section">
+                <h2>Virtual Try-On</h2>
+
+                <div className="tryon-tabs">
+                  <button
+                    className={`tab-btn ${tryOnMode === "clothing" ? "active" : ""}`}
+                    onClick={() => setTryOnMode("clothing")}
+                  >
+                    Clothing
+                  </button>
+                </div>
+
+                {tryOnMode === "clothing" && (
+                  <div className="tryon-content">
+                    <div className="tryon-upload-grid">
+                      <div className="tryon-upload-box">
+                        <h4>Person Image</h4>
+                        <input
+                          type="file"
+                          id="person-upload"
+                          accept="image/*"
+                          onChange={(e) => handleTryOnImageUpload("person", e)}
+                          style={{ display: "none" }}
+                        />
+                        <label htmlFor="person-upload" className="tryon-upload-label">
+                          {tryOnImages.person ? (
+                            <img src={tryOnImages.person.url} alt="Person" />
+                          ) : (
+                            <div className="upload-placeholder">
+                              <span>👤</span>
+                              <p>Upload</p>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+
+                      <div className="tryon-upload-box">
+                        <h4>Clothing Image</h4>
+                        <input
+                          type="file"
+                          id="clothing-upload"
+                          accept="image/*"
+                          onChange={(e) => handleTryOnImageUpload("clothing", e)}
+                          style={{ display: "none" }}
+                        />
+                        <label htmlFor="clothing-upload" className="tryon-upload-label">
+                          {tryOnImages.clothing ? (
+                            <img src={tryOnImages.clothing.url} alt="Clothing" />
+                          ) : (
+                            <div className="upload-placeholder">
+                              <span>👕</span>
+                              <p>Upload</p>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+                    </div>
+
+                    <button
+                      className="tryon-btn"
+                      onClick={handleVirtualTryOn}
+                      disabled={isTryOnLoading || !tryOnImages.person || !tryOnImages.clothing}
+                    >
+                      {isTryOnLoading ? "Processing..." : "✨ Try It On"}
+                    </button>
+
+                    {tryOnResult && (
+                      <div className="tryon-result">
+                        <h4>Result</h4>
+                        <img src={tryOnResult} alt="Try-on result" />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="closet-container-section">
           <div className="closet-container">
             <div className="closet-container-header">
               <h2>Your Items</h2>
-              <button className="add-item-button">+ Add Item</button>
+              <div className="header-actions">
+                <input
+                  type="file"
+                  id="closet-item-upload"
+                  accept="image/*"
+                  multiple
+                  onChange={handleAddItemToCloset}
+                  style={{ display: "none" }}
+                />
+                <label htmlFor="closet-item-upload" className="add-item-button">
+                  + Add Item
+                </label>
+              </div>
             </div>
 
             <div className="clothing-items-grid">
-              {clothingItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="clothing-item-card"
-                  onClick={() => handleItemClick(item)}
-                >
-                  <div className="item-image-wrapper">
-                    <img src={item.image} alt={item.name} />
-                    <div className="item-hover-overlay">
-                      <span>View Details</span>
+              {closetItems.length === 0 ? (
+                <div className="empty-closet-message">
+                  <p>Your closet is empty. Click "+ Add Item" to upload clothing images!</p>
+                </div>
+              ) : (
+                closetItems.map((item) => (
+                  <div key={item.id} className="clothing-item-card">
+                    <button
+                      className="remove-item-btn"
+                      onClick={() => handleRemoveItemFromCloset(item.id)}
+                      title="Remove item"
+                    >
+                      ×
+                    </button>
+                    <div
+                      className="item-image-wrapper"
+                      onClick={() => handleItemClick(item)}
+                    >
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} />
+                      ) : (
+                        <div className="clothing-item-placeholder">
+                          <span>👕</span>
+                        </div>
+                      )}
+                      <div className="item-hover-overlay">
+                        <span>View Details</span>
+                      </div>
+                    </div>
+                    <div className="item-card-info">
+                      <h4>{item.name}</h4>
+                      <p className="item-category">{item.category}</p>
                     </div>
                   </div>
-                  <div className="item-card-info">
-                    <h4>{item.name}</h4>
-                    <p className="item-category">{item.category}</p>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </section>
       </div>
 
-      {/* Detail Panel - Slides in from right */}
       {selectedItem && (
         <>
           <div className="detail-panel-overlay" onClick={handleCloseDetail} />
           <div className={`detail-panel ${selectedItem ? "active" : ""}`}>
-           
             <div className="detail-panel-content">
               <div className="detail-image-section">
                 <img src={selectedItem.image} alt={selectedItem.name} />
@@ -420,7 +514,7 @@ function ClosetPage({ onNavigate, closetData }) {
 
               <div className="detail-info-section">
                 <h2>{selectedItem.name}</h2>
-                
+
                 <div className="detail-meta-grid">
                   <div className="detail-meta-item">
                     <span className="meta-label">Category</span>
@@ -448,8 +542,15 @@ function ClosetPage({ onNavigate, closetData }) {
                 </div>
 
                 <div className="detail-actions">
-                  <button className="action-btn edit-btn">Edit Item</button>
-                  <button className="action-btn remove-btn">Remove</button>
+                  <button
+                    className="action-btn remove-btn"
+                    onClick={() => {
+                      handleRemoveItemFromCloset(selectedItem.id);
+                      handleCloseDetail();
+                    }}
+                  >
+                    Remove from Closet
+                  </button>
                 </div>
               </div>
             </div>
@@ -459,4 +560,5 @@ function ClosetPage({ onNavigate, closetData }) {
     </div>
   );
 }
+
 export default ClosetPage;

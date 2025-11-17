@@ -19,7 +19,6 @@ function WardrobePage({ onNavigate }) {
   const [showModal, setShowModal] = useState(false);
   const [newClosetData, setNewClosetData] = useState({
     name: "",
-    itemCount: "",
     type: ""
   });
 
@@ -58,7 +57,7 @@ function WardrobePage({ onNavigate }) {
   // Handle closing the modal
   const handleCloseModal = () => {
     setShowModal(false);
-    setNewClosetData({ name: "", itemCount: "", type: "" });
+    setNewClosetData({ name: "", type: "" });
   };
 
   // Handle input changes in the modal
@@ -72,14 +71,14 @@ function WardrobePage({ onNavigate }) {
 
   // Handle creating a new closet
   const handleCreateCloset = () => {
-    if (newClosetData.name && newClosetData.itemCount && newClosetData.type) {
+    if (newClosetData.name && newClosetData.type) {
       const newCloset = {
         id: Date.now(),
         ...newClosetData
       };
       setClosets(prev => [...prev, newCloset]);
       handleCloseModal();
-      
+
       // Navigate to the closet page with the new closet data
       onNavigate("closet", newCloset);
     } else {
@@ -156,15 +155,14 @@ function WardrobePage({ onNavigate }) {
 
             {/* Existing Closets */}
             {closets.map(closet => (
-              <div 
-                key={closet.id} 
+              <div
+                key={closet.id}
                 className="closet-card"
                 onClick={() => onNavigate("closet", closet)}
               >
                 <div className="closet-card-content">
                   <h3>{closet.name}</h3>
                   <p className="closet-type">{closet.type}</p>
-                  <p className="closet-items">{closet.itemCount} items</p>
                 </div>
               </div>
             ))}
@@ -188,19 +186,6 @@ function WardrobePage({ onNavigate }) {
                   value={newClosetData.name}
                   onChange={handleInputChange}
                   placeholder="e.g., Summer Collection"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="itemCount">Number of Items</label>
-                <input
-                  type="number"
-                  id="itemCount"
-                  name="itemCount"
-                  value={newClosetData.itemCount}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 20"
-                  min="1"
                 />
               </div>
 
